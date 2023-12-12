@@ -4,17 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Page</title>
+  <link rel="stylesheet" href="sweetalert2.min.css.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="main">
-    <h1>Login Page</h1>
-    <form id="loginForm">
-      <label for="workerMobile">Enter Mobile Number:</label>
-      <input type="tel" id="workerMobileNumber" name="workerMobile" required>
-      <!-- <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required> -->
-      <button type="submit">Login</button>
-    </form>
+  <div class="main-body">
+    <div id="main">
+      <h1>Login Page</h1>
+      <form id="loginForm">
+        <label for="workerMobile">Enter Mobile Number:</label>
+        <input type="tel" id="workerMobileNumber" name="workerMobile" required>
+        <label for="password">Password:</label>
+        <input type="password" id="workerPassword" name="workerPassword" required>
+        <p><a href="/forgotpassword">Forgot Password?</a></p>
+        <button type="submit">Login</button>
+        <p></p>
+      </form>
+      <p><small>Don't have an account? </small><a href="/signup.html">Signup</a></p>
+    </div>
   </div>
 
   <script>
@@ -22,6 +29,7 @@
       event.preventDefault();
 
       const workerMobile = document.getElementById('workerMobileNumber').value;
+      const workerPassword = document.getElementById('workerPassword').value;
 
       try {
         // Send data to the server for login
@@ -30,7 +38,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ workerMobile }),
+          body: JSON.stringify({ workerMobile, workerPassword }),
         });
 
         const data = await response.json();
@@ -38,18 +46,27 @@
 
         // Redirect or show a message based on the response
         if (data.success) {
-          alert('Login successful!');
-          // Redirect to the dashboard or another page if needed
-          window.location.href = '/worker/dashboard';
+          Swal.fire({
+            icon: 'success',
+            title: 'You Are Now In!',
+            text: 'Congrats!... you have successfully loged in',
+          }).then(() => {
+            // Redirect to the dashboard page
+            window.location.href = '/worker/dashboard';
+          });
           return
         } else {
-          // alert(data.message);
-          document.getElementById("main").innerHTML = data.message;
+          Swal.fire({
+            icon: 'error',
+            title: 'An Error Occured!',
+            text: data.message,
+          })
         }
       } catch (error) {
         console.error('Error:', error);
       }
     });
   </script>
+  <script src="./sweetalert2@11.min.js"></script>
 </body>
 </html>

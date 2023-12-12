@@ -1,21 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Signup Page</title>
+  <link rel="stylesheet" href="sweetalert2.min.css.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <h1>Signup Page</h1>
-  <form id="signupForm">
-    <label for="workerFirstName">Enter First Name:</label>
-    <input type="text" id="workerFirstName" name="workerFirstName" required>
-    <label for="workerLastName">Enter Last Name:</label>
-    <input type="text" id="workerLastName" name="workerLastName" required>
-    <label for="workerMobile">Enter Mobile Number:</label>
-    <input type="tel" id="workerMobile" name="workerMobile" required>
-    <button type="submit">Submit</button>
-  </form>
+  <div class="main-body">
+    <h1>Signup Page</h1>
+    <form id="signupForm">
+      <label for="workerFirstName">Enter First Name (3 characters minimum, letters and numbers only):</label>
+      <input type="text" id="workerFirstName" name="workerFirstName" pattern="[A-Za-z0-9]{3,}" required>
+
+      <label for="workerLastName">Enter Last Name (3 characters minimum, letters and numbers only):</label>
+      <input type="text" id="workerLastName" name="workerLastName" pattern="[A-Za-z0-9]{3,}" required>
+
+      <label for="workerMobile">Enter Mobile Number:</label>
+      <input type="tel" id="workerMobile" name="workerMobile" required>
+
+      <label for="workerPassword">Enter Password (6 characters minimum):</label>
+      <input type="password" id="workerPassword" name="workerPassword" pattern=".{6,}" required>
+
+      <label for="workerRepeatPassword">Repeat Password:</label>
+      <input type="password" id="workerRepeatPassword" name="workerRepeatPassword" required>
+
+      <label>
+        <input type="checkbox" id="showPassword"> Show Password
+      </label>
+
+      <button type="submit">Submit</button>
+
+      <p><small>Have an account? </small><a href="/login.html">Login</a></p>
+    </form>
+  </div>
 
   <script>
     document.getElementById('signupForm').addEventListener('submit', async function (event) {
@@ -24,6 +45,18 @@
       const workerFirstName = document.getElementById('workerFirstName').value;
       const workerLastName = document.getElementById('workerLastName').value;
       const workerMobile = document.getElementById('workerMobile').value;
+      const workerPassword = document.getElementById('workerPassword').value;
+      const workerRepeatPassword = document.getElementById('workerRepeatPassword').value;
+
+      // Validate password match
+      if (workerPassword !== workerRepeatPassword) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning!',
+            text: 'Passwords do not match! Please check to be sure that they math and try again',
+          })
+        return;
+      }
 
       try {
         // Send data to the server for signup
@@ -32,7 +65,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ workerFirstName, workerLastName, workerMobile }),
+          body: JSON.stringify({ workerFirstName, workerLastName, workerMobile, workerPassword }),
         });
 
         const data = await response.json();
@@ -40,16 +73,38 @@
 
         // Redirect or show a message based on the response
         if (data.success) {
-          alert('Signup successful!');
+          Swal.fire({
+            icon: 'success',
+            title: 'Signup successful!',
+            text: 'Congrats!... you have successfully created an account. Please Enter the code that we sent to your number',
+          }).then(() => {
+            // Redirect to the login page
+            window.location.href = '/login.html';
+          });
           // Redirect to the login page or another page if needed
-          window.location.href = '/worker/login';
         } else {
-          alert(data.message);
+          Swal.fire({
+            icon: 'warning',
+            title: 'Signup Not successful!',
+            text: data.message,
+          })
         }
       } catch (error) {
         console.error('Error:', error);
       }
+
+
+    });
+
+    // Toggle show/hide password
+    document.getElementById('showPassword').addEventListener('change', function () {
+      const passwordInput = document.getElementById('workerPassword');
+      const repeatPasswordInput = document.getElementById('workerRepeatPassword');
+      passwordInput.type = this.checked ? 'text' : 'password';
+      repeatPasswordInput.type = this.checked ? 'text' : 'password';
     });
   </script>
+  <script src="./sweetalert2@11.min.js"></script>
 </body>
+
 </html>
