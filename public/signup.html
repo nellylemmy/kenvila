@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup Page</title>
+</head>
+<body>
+  <h1>Signup Page</h1>
+  <form id="signupForm">
+    <label for="workerFirstName">Enter First Name:</label>
+    <input type="text" id="workerFirstName" name="workerFirstName" required>
+    <label for="workerLastName">Enter Last Name:</label>
+    <input type="text" id="workerLastName" name="workerLastName" required>
+    <label for="workerMobile">Enter Mobile Number:</label>
+    <input type="tel" id="workerMobile" name="workerMobile" required>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const workerFirstName = document.getElementById('workerFirstName').value;
+      const workerLastName = document.getElementById('workerLastName').value;
+      const workerMobile = document.getElementById('workerMobile').value;
+
+      try {
+        // Send data to the server for signup
+        const response = await fetch('/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ workerFirstName, workerLastName, workerMobile }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        // Redirect or show a message based on the response
+        if (data.success) {
+          alert('Signup successful!');
+          // Redirect to the login page or another page if needed
+          window.location.href = '/worker/login';
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>
