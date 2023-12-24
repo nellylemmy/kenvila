@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dashboard</title>
-    <link rel="stylesheet" href="sweetalert2.min.css.css">
+    <link rel="stylesheet" href="./../sweetalert2.min.css.css">
 </head>
 <body>
     <h2>dashboard</h2>
     <h3>LIST OF ACCOMPLISHMENTS TOMORROW</h3>
     <ol>
-        <li>Ask worker before log out</li>
-        <li>Reset Your password</li>
+        <!-- <li>Ask worker before log out</li> -->
+        <!-- <li>Reset Your password</li> -->
         <li>Verify Account (we send a verification code to phone number)</li>
-        <li>Douglas's job</li>
+        <li>Socket.io to connect only loged in workers (only text. we will not save any media,it will be saved to the workers device. This data will be encrypted so it will be end to end encrypted)</li>
+        <li>check to see if we can have reset-password and verify-request-password on different pages nad we only do for the ones who have not loge in</li>
     </ol>
 
     <h3>LIST OF ACCOMPLISHMENTS SOON</h3>
@@ -25,8 +26,32 @@
         <li>Douglas's job</li>
     </ol>
 
-    <a href="/logout">Logout</a>
+    <a href="./../registerIPN.html">Register IPN</a>
 
-<script src="./sweetalert2@11.min.js"></script>
+    <button id="logoutButton">Logout</button>
+
+
+<script src="./../sweetalert2@11.min.js"></script>
+<script>
+    document.getElementById('logoutButton').addEventListener('click', function () {
+      // Display a confirmation dialog using SweetAlert2
+      Swal.fire({
+        icon: 'question',
+        title: 'Are you sure you want to logout?',
+        text: 'We are happy that you tried us',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, logout',
+        cancelButtonText: 'Cancel',
+      }).then((result) => {
+        // If the user clicks "Yes, logout," proceed with the logout
+        if (result.isConfirmed) {
+          // You can perform the logout action here
+          // For example, redirect the user to the login page
+          window.location.href = '/logout';
+        }
+      });
+    });
+</script>    
+
 </body>
 </html>

@@ -15,7 +15,8 @@ html, body{
 }
 
 #signupForm,
-#loginForm{
+#loginForm,
+#requestResetForm{
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -23,14 +24,16 @@ html, body{
 }
 
 #signupForm input,
-#loginForm input{
+#loginForm input,
+#requestResetForm input{
     padding: .6rem 1rem;
     border-radius: 6px;
     border: 1px solid darkolivegreen;
 }
 
 #signupForm button,
-#loginForm button{
+#loginForm button,
+#requestResetForm button{
     padding: .6rem;
     border-radius: 6px;
     border: 1px solid rgb(0, 2, 117);

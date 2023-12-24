@@ -1,4 +1,5 @@
 const express = require("express");
+const axios = require('axios');
 const app = express();
 const compression = require('compression');
 const bodyParser = require('body-parser');
@@ -12,6 +13,11 @@ const io = socketIO(server);
 const session = require('express-session');
 const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
+const randomstring = require('randomstring');
+const authentication = require('./public/authentication');
+require('./public/registerIPNURL');
+const error404 = require('./ui_error404');
+const rateLimiterMessage = require('./rateLimiterMessage');
 
 require('dotenv').config();
 
@@ -22,47 +28,6 @@ app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-const rateLimiterMessage = `<style>
-section{
-max-width:30rem;
-margin:5rem auto;
-}
-.card {
-display: flex;
-flex-direction: column;
-border: 1px red solid;
-}
-.header {
-height: 30%;
-background: red;
-color: white;
-text-align: center;
-font-size: 1.3rem;
-font-weight: 600;
-}
-.container {
-padding: 2px 16px;
-}
-</style>
-
-<section>
-<div class="card">
-<div class="header">
-<p>Too Many Request! Please Wait for 15 minutes</p>
-</div>
-<div class="container">
-<p>We apologize for the inconvenience, but it seems that there has been unusual activity detected from your device. To ensure the security of your account, we have temporarily restricted access for the next 15 minutes. This precautionary measure helps us protect your account from potential unauthorized access.
-</p>
-
-<p>
-If you have forgotten your account information or need assistance, please don't hesitate to contact our support team. We'll be happy to assist you in recovering your account.
-</p>
-
-<p>Thank you for your understanding and cooperation in maintaining the security of your account.</p>
-</div>
-</div>
-</section>`;
 
 app.use(session({
   name: 'session',
@@ -83,7 +48,7 @@ let rateLimitMessage = {
   message: ({ success: false, message: rateLimiterMessage })
 };
 
-// // Rate limiting middleware
+// Rate limiting middleware
 const userLoginAttemptLimiter = rateLimit(rateLimitMessage);
 app.use('/login', (userLoginAttemptLimiter))
 
@@ -100,29 +65,9 @@ let generateRandomNumbers = function (amount, limit) {
 }
 
 
-
-// Set up a simple HTML form for login
-// app.get('/worker/login', (req, res) => {
-//   // Check if the worker is already logged in
-//   if (req.session.worker) {
-//     return res.redirect('/worker/dashboard');
-//   }
-//   res.sendFile(path.join(__dirname, 'public', 'login.html'));
-// });
-
-// Set up a simple HTML form for signup
-app.get('/worker/signup', (req, res) => {
-  if (req.session.worker) {
-    return res.redirect('/worker/dashboard');
-  }
-  res.sendFile(path.join(__dirname, 'public', 'signup.html'));
-});
-
 app.get('/worker', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'worker.html'));
 });
-
-
 
 app.get('/', (req, res) => {
   if (req.session.worker) {
@@ -135,20 +80,22 @@ app.get('/', (req, res) => {
     // return res.sendFile(path.join(__dirname, 'public', 'home.html'));
   }
 });
-// res.sendFile(path.join(__dirname, 'public', 'index.html'));
 
 app.get('/worker/dashboard', (req, res) => {
   // Check if the user is logged in
   if (!req.session.worker) {
     return res.redirect('/worker');
   }
-
   // Render the dashboard page for authenticated users
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
+app.get('/ipn-register', (req, res) => {
+  // Render the dashboard page for authenticated users
+  res.sendFile(path.join(__dirname, 'public', 'registerIPN.html'));
+});
 
 // Handle POST requests for signup
-app.post('/signup', async (req, res, next) => {
+app.post('/signup', async (req, res, next) => { 
   const { workerFirstName, workerLastName, workerMobile, workerPassword } = await req.body;
   try {
     // Validate inputs
@@ -244,17 +191,17 @@ app.post('/login', async (req, res, next) => {
 });
 
 // Handle GET requests to fetch data from the database
-app.get('/api/data', async (req, res) => {
-  try {
-    // Fetch data from the database using async/await
-    const query = 'SELECT worker_first_name, worker_last_name, worker_mobile_number FROM workers';
-    const [result] = await dbConnection.query(query);
-    res.json(result);
-  } catch (err) {
-    console.error('Error fetching data from MySQL: ', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
+// app.get('/api/data', async (req, res) => {
+//   try {
+//     // Fetch data from the database using async/await
+//     const query = 'SELECT worker_first_name, worker_last_name, worker_mobile_number FROM workers';
+//     const [result] = await dbConnection.query(query);
+//     res.json(result);
+//   } catch (err) {
+//     console.error('Error fetching data from MySQL: ', err);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// });
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => err);
   res.redirect('/');
@@ -280,6 +227,168 @@ app.post('/api/data', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+const expirationTimeInMinutes = 1; // Set the expiration time for the reset code
+
+// Route to request a password reset
+app.post('/reset-password/request', async(req, res) => {
+  const { workerMobile } = req.body;
+  const [rows] = await dbConnection.execute('SELECT * FROM `workers` WHERE `worker_mobile_number`=?', [workerMobile]);
+
+  if (!rows || rows.length === 0) {
+    // Worker with the provided mobile number not found
+    return res.json({ success: false, message: 'Invalid mobile number. Please check your number and try again' });
+  }
+
+  // Generate a random reset code (you can customize the length as needed)
+  const resetCode = randomstring.generate({
+    length: 6,
+    charset: 'numeric',
+  });
+
+  // Store the reset code in the session (you may want to use a more persistent storage)
+  req.session.resetCode = resetCode;
+  req.session.resetMobile = workerMobile;
+  req.session.resetTimestamp = Date.now();
+
+  // Send the reset code to the worker (you can use a SMS service for a real application)
+  console.log(`Reset code for ${workerMobile}: ${resetCode}`);
+
+  res.json({ success: true, message: 'Reset code sent successfully' });
+});
+
+
+// Route to verify the reset code and update the password
+app.post('/reset-password/verify', async (req, res) => {
+  const { resetCode, newPassword } = req.body;
+
+  // Check if the reset code matches the one stored in the session
+  if (resetCode !== req.session.resetCode) {
+    return res.json({ success: false, message: 'Invalid reset code. Reset code usually expires. Please request anew one' });
+  }
+
+  // Check if the reset code has expired
+  const currentTime = Date.now();
+  const resetTimestamp = req.session.resetTimestamp || 0;
+  const elapsedTime = (currentTime - resetTimestamp) / (1000 * 60); // Convert milliseconds to minutes
+
+  if (elapsedTime > expirationTimeInMinutes) {
+    // Reset code has expired
+    delete req.session.resetCode;
+    delete req.session.resetMobile;
+    delete req.session.resetTimestamp;
+    return res.json({ success: false, message: 'Reset code has expired' });
+  }
+
+  // Find the worker based on the mobile number stored in the session
+  // const worker = workersDatabase.find(w => w.workerMobile === req.session.resetMobile);
+  if (!req.session.resetMobile) {
+    return res.json({ success: false, message: 'Worker not found' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.json({ success: false, message: 'Password must be at least 6 characters long' });
+  }
+
+  // Hash the new password
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  // Update the worker's password in the database (you may want to use a more secure storage)
+  const [rows] = await dbConnection.execute('SELECT * FROM `workers` WHERE `worker_mobile_number`=?', [req.session.resetMobile]);
+
+  const passwordFromSession = rows[0].worker_password;
+
+    if (!passwordFromSession) {
+      // Database entry for worker does not have a password (handle this case based on your application logic)
+      return res.json({ success: false, message: 'Invalid mobile number' });
+    }
+    dbConnection.execute("UPDATE `workers` SET `worker_password` =? WHERE `worker_mobile_number`=?", [hashedPassword, req.session.resetMobile]);
+
+  // worker.workerPassword = hashedPassword;
+
+  // Clear the reset code, mobile, and timestamp from the session
+  delete req.session.resetCode;
+  delete req.session.resetMobile;
+  delete req.session.resetTimestamp;
+
+  console.log('Password reset successful')
+  res.json({ success: true, message: 'Password reset successful. Log in with your number and the new password' });
+});
+
+
+//==========================================================================
+        //  PESAPAL API START
+//==========================================================================
+
+
+
+// authentication()
+//   .then(authKey => {
+//     console.log(`Bearer ${authKey.token}`);
+//   })
+//   .catch(error => {
+//     console.error('Error:', error);
+//   });
+
+async function submitOrder(req,res) {
+await axios.post(apiUrl, data, { headers })
+    .then(response => {
+        const token = response.data.token;
+        // Use the token as needed
+        console.log('Token:', token);
+        const headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+      };
+      
+      const merchantReference = Math.floor(Math.random() * 1000000000000000000);
+      const phone = 792471415;
+      const countryCode = '254';
+      const amount = 15.30;
+      const callbackUrl = 'https://afe2-41-81-145-186.ngrok-free.app/';
+      const branch = 'KENCODERS KE';
+      const firstName = 'Nelson';
+      const middleName = 'Lemein';
+      const lastName = 'Kilelo';
+      const emailAddress = 'nelson.lemein@yahoo.com';
+
+      var data = JSON.stringify({
+        "id": merchantReference,
+        "currency": "KES",
+        "amount": amount,
+        "description": "Payment By NELSON",
+        "callback_url": callbackUrl,
+        "notification_id": "4d4de977-b3e6-4597-b128-ddd3fce22016",
+        "branch": branch,
+        "billing_address": {
+          "email_address": emailAddress,
+          "phone_number": phone,
+          "country_code": countryCode,
+          "first_name": firstName,
+          "middle_name": middleName,
+          "last_name": lastName,
+          "line_1": "",
+          "line_2": "",
+          "city": "",
+          "state": "",
+          "postal_code": null,
+          "zip_code": null
+        }
+      });
+
+    })
+    .catch(error => {
+        console.error('Error:', error.message);
+    });
+
+  }
+  // submitOrder()
+//==========================================================================
+        //  PESAPAL API STOP
+//==========================================================================
+
+
 // Socket.io connection handling
 io.on('connection', (socket) => {
   console.log('This client is connected to socket.io');
@@ -287,107 +396,7 @@ io.on('connection', (socket) => {
 
 app.use(async (req, res, next) => {
   try {
-    res.status(404).send(`<style>body {
-background-color: #2F3242;
-}
-svg {
-position: absolute;
-top: 50%;
-left: 50%;
-margin-top: -250px;
-margin-left: -400px;
-}
-.message-box {
-height: 200px;
-width: 380px;
-position: absolute;
-top: 50%;
-left: 50%;
-margin-top: -100px;
-margin-left: 50px;
-color: #FFF;
-font-family: Roboto;
-font-weight: 300;
-}
-.message-box h1 {
-font-size: 60px;
-line-height: 46px;
-margin-bottom: 40px;
-}
-.buttons-con .action-link-wrap {
-margin-top: 40px;
-}
-.buttons-con .action-link-wrap a {
-background: #68c950;
-padding: 8px 25px;
-border-radius: 4px;
-color: #FFF;
-font-weight: bold;
-font-size: 14px;
-transition: all 0.3s linear;
-cursor: pointer;
-text-decoration: none;
-margin-right: 10px
-}
-.buttons-con .action-link-wrap a:hover {
-background: #5A5C6C;
-color: #fff;
-}
-
-#Polygon-1 , #Polygon-2 , #Polygon-3 , #Polygon-4 , #Polygon-4, #Polygon-5 {
-animation: float 1s infinite ease-in-out alternate;
-}
-#Polygon-2 {
-animation-delay: .2s; 
-}
-#Polygon-3 {
-animation-delay: .4s; 
-}
-#Polygon-4 {
-animation-delay: .6s; 
-}
-#Polygon-5 {
-animation-delay: .8s; 
-}
-
-@keyframes float {
-100% {
-transform: translateY(20px);
-}
-}
-@media (max-width: 450px) {
-svg {
-position: absolute;
-top: 50%;
-left: 50%;
-margin-top: -250px;
-margin-left: -190px;
-}
-.message-box {
-top: 50%;
-left: 50%;
-margin-top: -100px;
-margin-left: -190px;
-text-align: center;
-}
-}</style><svg width="380px" height="500px" viewBox="0 0 837 1045" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
-<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
-<path d="M353,9 L626.664028,170 L626.664028,487 L353,642 L79.3359724,487 L79.3359724,170 L353,9 Z" id="Polygon-1" stroke="#007FB2" stroke-width="6" sketch:type="MSShapeGroup"></path>
-<path d="M78.5,529 L147,569.186414 L147,648.311216 L78.5,687 L10,648.311216 L10,569.186414 L78.5,529 Z" id="Polygon-2" stroke="#EF4A5B" stroke-width="6" sketch:type="MSShapeGroup"></path>
-<path d="M773,186 L827,217.538705 L827,279.636651 L773,310 L719,279.636651 L719,217.538705 L773,186 Z" id="Polygon-3" stroke="#795D9C" stroke-width="6" sketch:type="MSShapeGroup"></path>
-<path d="M639,529 L773,607.846761 L773,763.091627 L639,839 L505,763.091627 L505,607.846761 L639,529 Z" id="Polygon-4" stroke="#F2773F" stroke-width="6" sketch:type="MSShapeGroup"></path>
-<path d="M281,801 L383,861.025276 L383,979.21169 L281,1037 L179,979.21169 L179,861.025276 L281,801 Z" id="Polygon-5" stroke="#36B455" stroke-width="6" sketch:type="MSShapeGroup"></path>
-</g>
-</svg>
-<div class="message-box">
-<h1>404</h1>
-<p>Page not found</p>
-<div class="buttons-con">
-<div class="action-link-wrap">
-<a onclick="history.back(-1)" class="link-button link-back-button">Go Back</a>
-</div>
-</div>
-</div>`)
+    res.status(404).send(error404)
   } catch (e) {
     next(e);
   }

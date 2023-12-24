@@ -3,42 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Page</title>
+  <title>REGISTER IPN</title>
   <link rel="stylesheet" href="sweetalert2.min.css.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="main-body">
     <div id="main">
-      <h1>Login Page</h1>
-      <form id="loginForm">
-        <label for="workerMobile">Enter Mobile Number:</label>
-        <input type="tel" id="workerMobileNumber" name="workerMobile" required>
-        <label for="password">Password:</label>
-        <input type="password" id="workerPassword" name="workerPassword" required>
-        <p><a href="./reset-password.html">Forgot Password?</a></p>
-        <button type="submit">Login</button>
+      <h1>REGISTER IPN</h1>
+      <form id="registerIPNForm">
+        <label for="workerMobile">Enter IPN Url:</label>
+        <input type="text" id="ipnInput" name="ipnInput" required>
+        <button type="submit">Submit</button>
         <p></p>
       </form>
-      <p><small>Don't have an account? </small><a href="/signup.html">Signup</a></p>
+      <p><small>Experiencing Problem? </small><a href="https://documenter.getpostman.com/view/6715320/UyxepTv1#cc6f853e-0802-4b0d-b8b8-17ed90308189">Read Documentations</a></p>
     </div>
   </div>
 
   <script>
-    document.getElementById('loginForm').addEventListener('submit', async function (event) {
+    document.getElementById('registerIPNForm').addEventListener('submit', async function (event) {
       event.preventDefault();
 
-      const workerMobile = document.getElementById('workerMobileNumber').value;
-      const workerPassword = document.getElementById('workerPassword').value;
+      const ipnInput = document.getElementById('ipnInput').value;
 
       try {
         // Send data to the server for login
-        const response = await fetch('/login', {
+        const response = await fetch('/register-ipn', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ workerMobile, workerPassword }),
+          body: JSON.stringify({ ipnInput }),
         });
 
         const data = await response.json();
@@ -48,11 +44,11 @@
         if (data.success) {
           Swal.fire({
             icon: 'success',
-            title: 'You Are Now In!',
-            text: 'Congrats!... you have successfully loged in',
+            title: 'SUCCESS',
+            text: 'Your IPN Registered successfully',
           }).then(() => {
             // Redirect to the dashboard page
-            window.location.href = '/worker/dashboard';
+            window.location.href = '/';
           });
           return
         } else {
