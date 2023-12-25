@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPN List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    #ipnDataContainer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      padding: 20px;
+    }
+
+    .ipn-card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin: 15px;
+      padding: 15px;
+      width: 300px;
+      text-align: left;
+      position: relative;
+    }
+
+    .ipn-card h4 {
+      margin-bottom: 5px;
+      color: #666;
+    }
+
+    .ipn-card h3 {
+      color: #333;
+    }
+
+    .ipn-card p {
+      margin: 10px 0;
+      color: #666;
+    }
+
+    .copy-button {
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      margin-right: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #4caf50;
+      color: #fff;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>IPN List</h1>
+  <div id="ipnDataContainer"></div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    function copyToClipboard(text, message) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+
+      // Show toast message with the corresponding list number
+      showToast(message);
+    }
+
+    function createCopyButton(text, label, message, listNumber) {
+      const button = document.createElement('button');
+      button.textContent = `Copy ${label}`;
+      button.className = 'copy-button';
+      button.addEventListener('click', () => copyToClipboard(text, `${label} number ${listNumber} copied`));
+      return button;
+    }
+
+    function createIPNCard(ipn, listNumber) {
+      const card = document.createElement('div');
+      card.className = 'ipn-card';
+
+      // Display list number just before the created date
+      const listNumberHeading = document.createElement('h4');
+      listNumberHeading.textContent = `List #${listNumber}`;
+      card.appendChild(listNumberHeading);
+
+      const createdDateHeading = document.createElement('h4');
+      const createdDate = new Date(ipn.created_date).toLocaleString();
+      createdDateHeading.textContent = `Created Date: ${createdDate}`;
+      card.appendChild(createdDateHeading);
+
+      const idHeading = document.createElement('h3');
+      idHeading.textContent = `IPN ID: ${ipn.ipn_id}`;
+      card.appendChild(idHeading);
+
+      const urlParagraph = document.createElement('p');
+      urlParagraph.textContent = `URL: ${ipn.url}`;
+      card.appendChild(urlParagraph);
+
+      const copyUrlButton = createCopyButton(ipn.url, 'URL', 'URL copied', listNumber);
+      const copyIpnIdButton = createCopyButton(ipn.ipn_id, 'IPN ID', 'IPN ID copied', listNumber);
+
+      card.appendChild(copyUrlButton);
+      card.appendChild(copyIpnIdButton);
+
+      return card;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+
+      // Hide the toast after 2 seconds
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 2000);
+    }
+
+    function fetchIPNData() {
+      fetch('/ipn_list')
+        .then(response => response.json())
+        .then(data => {
+          data.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+
+          const ipnDataContainer = document.getElementById('ipnDataContainer');
+
+          if (Array.isArray(data) && data.length > 0) {
+            data.forEach((ipn, index) => {
+              const listNumber = index + 1;
+              const card = createIPNCard(ipn, listNumber);
+              ipnDataContainer.appendChild(card);
+            });
+          } else {
+            ipnDataContainer.textContent = 'No IPN data available.';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching IPN data:', error);
+          document.getElementById('ipnDataContainer').textContent = 'Error fetching IPN data.';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchIPNData);
+  </script>
+</body>
+</html>

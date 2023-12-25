@@ -28,7 +28,7 @@
       const ipnInput = document.getElementById('ipnInput').value;
 
       try {
-        // Send data to the server for login
+        // Send data to the server
         const response = await fetch('/register-ipn', {
           method: 'POST',
           headers: {
@@ -45,11 +45,13 @@
           Swal.fire({
             icon: 'success',
             title: 'SUCCESS',
-            text: 'Your IPN Registered successfully',
-          }).then(() => {
-            // Redirect to the dashboard page
-            window.location.href = '/';
-          });
+            confirmButtonText: 'View IPN List',
+            text: `${data.message}`,
+          }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/ipnlist.html';
+        }
+      });
           return
         } else {
           Swal.fire({

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SUBMIT ORDER</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-DOerDRhK8MdmLzHLF5Aj6Qv/j94O0TftaRdt+LL95v3PyEjv5C04YtEvIQoMI2/t" crossorigin="anonymous">
+  <link rel="stylesheet" href="sweetalert2.min.css.css">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #main {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    label,
+    input,
+    button,
+    p {
+      display: block;
+    }
+
+    label {
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    p {
+      margin-top: 20px;
+      color: #888;
+    }
+
+    a {
+      color: #3498db;
+      text-decoration: none;
+    }
+
+    iframe {
+      width: 100%;
+      height: 400px; /* Adjust the height based on your design preferences */
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="main">
+    <h1>COMPLETE PAYMENT</h1>
+    <form id="submitOrder">
+      <label for="amount">Enter amount:</label>
+      <input type="number" id="amountInput" name="amountInput" required>
+      <button type="submit">Submit</button>
+      <p><small>Experiencing a problem? <a href="https://documenter.getpostman.com/view/6715320/UyxepTv1#cc6f853e-0802-4b0d-b8b8-17ed90308189">Read Documentations</a></small></p>
+    </form>
+    <iframe id="paymentIframe" style="display: none;"></iframe>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.getElementById('submitOrder').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const amountInput = document.getElementById('amountInput').value;
+      try {
+        const response = await fetch('/submit-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ amountInput }),
+        });
+        const data = await response.json();
+        console.log(data);
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'SUCCESS',
+            confirmButtonText: 'order',
+            text: `${data.message}`,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const iframe = document.getElementById('paymentIframe');
+              iframe.src = data.paymentURL;
+              iframe.style.display = 'block';
+
+              // Hide form elements when displaying the iframe
+              document.getElementById('submitOrder').style.display = 'none';
+            }
+          });
+          return
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'An Error Occurred!',
+            text: data.message,
+          })
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

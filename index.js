@@ -14,8 +14,6 @@ const session = require('express-session');
 const rateLimit = require('express-rate-limit');
 const bcrypt = require('bcryptjs');
 const randomstring = require('randomstring');
-const authentication = require('./public/authentication');
-require('./public/registerIPNURL');
 const error404 = require('./ui_error404');
 const rateLimiterMessage = require('./rateLimiterMessage');
 
@@ -64,8 +62,77 @@ let generateRandomNumbers = function (amount, limit) {
   return result;
 }
 
+const APP_ENVIRONMENT = 'live'; // sandbox or live
 
-app.get('/worker', (req, res) => {
+let apiUrl, consumerKey, consumerSecret,ipnRegistrationUrl,SubmitOrderRequest,getIPNList;
+
+if (APP_ENVIRONMENT === 'sandbox') {
+    apiUrl = 'https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken'; // Sandbox URL
+    ipnRegistrationUrl = 'https://cybqa.pesapal.com/pesapalv3/api/URLSetup/RegisterIPN';
+    SubmitOrderRequest = 'https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest';
+    getIPNList = 'https://cybqa.pesapal.com/pesapalv3/api/URLSetup/GetIpnList';
+    getTransactionStatus = 'https://cybqa.pesapal.com/pesapalv3/api/Transactions/GetTransactionStatus?orderTrackingId='
+    consumerKey = 'qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW';
+    consumerSecret = 'osGQ364R49cXKeOYSpaOnT++rHs=';
+} else if (APP_ENVIRONMENT === 'live') {
+    apiUrl = 'https://pay.pesapal.com/v3/api/Auth/RequestToken'; // Live URL
+    ipnRegistrationUrl = 'https://pay.pesapal.com/v3/api/URLSetup/RegisterIPN';
+    SubmitOrderRequest = 'https://pay.pesapal.com/v3/api/Transactions/SubmitOrderRequest';
+    getIPNList = 'https://pay.pesapal.com/v3/api/URLSetup/GetIpnList';
+    getTransactionStatus = 'https://pay.pesapal.com/v3/api/Transactions/GetTransactionStatus?orderTrackingId='
+    consumerKey = 'oO1BAVZ9v4v0F9yJ95EEznpommeeFLKW';
+    consumerSecret = 'ldp+6/Np3eWI1mc0RMxdw5co6LU=';
+} else {
+    console.log('Invalid APP_ENVIRONMENT');
+    process.exit(1);
+}
+
+const authentication = async () => {
+  try {
+    const data = {
+      consumer_key: consumerKey,
+      consumer_secret: consumerSecret,
+    };
+
+    const response = await axios.post(apiUrl, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+
+    return response.data; // Assuming the authentication key is in the response data
+  } catch (error) {
+    console.error('Error during authentication:', error);
+    throw error; // Propagate the error up the call stack
+  }
+};
+
+app.get('/ipn_list', async (req, res) => {
+  try {
+    const authKey = await authentication();
+    const token = `Bearer ${authKey.token}`;
+    const getIPNconfig = {
+      method: 'get',
+      url: getIPNList,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+    };
+
+    const response = await axios(getIPNconfig);
+    const ipnData = response.data;
+
+    res.json(ipnData); // Send JSON data as the response
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/worker', async(req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'worker.html'));
 });
 
@@ -89,7 +156,7 @@ app.get('/worker/dashboard', (req, res) => {
   // Render the dashboard page for authenticated users
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
-app.get('/ipn-register', (req, res) => {
+app.get('/ipn-register', async(req, res) => {
   // Render the dashboard page for authenticated users
   res.sendFile(path.join(__dirname, 'public', 'registerIPN.html'));
 });
@@ -322,14 +389,6 @@ app.post('/reset-password/verify', async (req, res) => {
 
 
 
-// authentication()
-//   .then(authKey => {
-//     console.log(`Bearer ${authKey.token}`);
-//   })
-//   .catch(error => {
-//     console.error('Error:', error);
-//   });
-
 async function submitOrder(req,res) {
 await axios.post(apiUrl, data, { headers })
     .then(response => {
@@ -383,7 +442,114 @@ await axios.post(apiUrl, data, { headers })
     });
 
   }
-  // submitOrder()
+
+
+
+
+  
+    // Handle POST requests for login
+app.post('/register-ipn', async (req, res) => {
+  try {
+    const { ipnInput } = req.body;
+
+    const authKey = await authentication();
+    const token = `Bearer ${authKey.token}`;
+
+    const data = JSON.stringify({
+      url: ipnInput,
+      ipn_notification_type: 'GET',
+    });
+
+    const config = {
+      method: 'post',
+      url: ipnRegistrationUrl,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      data: data,
+    };
+
+    const response = await axios(config);
+
+    res.json({ success: true, message: `IPN registration successful URL: ${response.data.url}, IPN_ID: ${response.data.ipn_id}` });
+  } catch (error) {
+    console.error('Error during IPN registration:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+
+app.post('/submit-order', async (req, res) => {
+  try {
+    const { amountInput } = req.body;
+
+    const authKey = await authentication();
+    const token = `Bearer ${authKey.token}`;
+
+    const merchantReference = Math.floor(Math.random() * 1000000000000000);
+      const phone = 792471415;
+      const countryCode = '254';
+      const callbackUrl = 'https://7a48-154-159-254-169.ngrok-free.app/';
+      const notificationId = '19eb1300-8ba9-46f8-8620-ddc9327f3696';
+      const branch = 'KENCODERS KE';
+      const firstName = 'Nelson';
+      const middleName = 'Lemein';
+      const lastName = 'Kilelo';
+      const emailAddress = 'nelson.lemein@yahoo.com';
+
+    const data = JSON.stringify({
+      "id": merchantReference,
+      "currency": "KES",
+      "amount": amountInput,
+      "description": "Payment By NELSON",
+      "callback_url": callbackUrl,
+      "notification_id": notificationId,
+      "branch": branch,
+      "billing_address": {
+        "email_address": emailAddress,
+        "phone_number": phone,
+        "country_code": countryCode,
+        "first_name": firstName,
+        "middle_name": middleName,
+        "last_name": lastName,
+        "line_1": "",
+        "line_2": "",
+        "city": "",
+        "state": "",
+        "postal_code": null,
+        "zip_code": null
+      }
+    });
+
+    const config = {
+      method: 'post',
+      url: SubmitOrderRequest,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      data: data,
+    };
+
+    
+    const response = await axios(config);
+
+    console.log(response.data)
+    res.json({ success: true, message: `Order Sent Successfully: Status-${response.data.status}`, paymentURL: response.data.redirect_url });
+  } catch (error) {
+    console.error('Error on Placing order:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+
+
+
+
+
 //==========================================================================
         //  PESAPAL API STOP
 //==========================================================================
