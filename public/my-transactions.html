@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Data</title>
+    <style>
+      body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+#transactionList {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.transactionItem {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+    </style>
+</head>
+<body>
+
+<div id="transactionList"></div>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Fetch transaction data from the server
+    axios.get('/my_transaction')
+        .then(function (response) {
+            // Handle the response and display transaction data
+            displayTransactionData(response.data);
+        })
+        .catch(function (error) {
+            console.error(error);
+            // Handle error, display an error message, etc.
+        });
+});
+
+function displayTransactionData(transactionDataList) {
+    const transactionListContainer = document.getElementById('transactionList');
+
+    // Clear existing content
+    transactionListContainer.innerHTML = '';
+
+    // Display each transaction item
+    transactionDataList.forEach(function (transactionData) {
+        const transactionItem = document.createElement('div');
+        transactionItem.classList.add('transactionItem');
+
+        // Customize how you want to display each transaction item
+        transactionItem.innerHTML = `
+            <p>Date: ${transactionData.created_date}</p>
+            <p>Transactin ID: ${transactionData.order_tracking_id}</p>
+            <p>Confirmation Code: ${transactionData.confirmation_code}</p>
+            <p>Payment Method: ${transactionData.payment_method}</p>
+            <p>Currency: ${transactionData.currency}</p>
+            <p>Amount: ${transactionData.amount}</p>
+            <p>Payment Status: ${transactionData.payment_status_description}</p>
+            <p>Message: ${transactionData.message}</p>
+            <p>Merchant Reference: ${transactionData.merchant_reference}</p>
+            <p>Payment Account: ${transactionData.payment_account}</p>
+            <p>Status Code: ${transactionData.status_code}</p>
+            <p>Status: ${transactionData.status}</p>
+            <p>Errors: ${transactionData.error.message}</p>
+        `;
+
+        transactionListContainer.appendChild(transactionItem);
+    });
+}
+
+</script>
+</body>
+</html>
+
+
+<!-- {"payment_method":"","amount":12,"created_date":"2023-12-26T02:46:04.677","confirmation_code":"","order_tracking_id":"12098069-e581-4c6a-8757-ddc9853b2579","payment_status_description":"INVALID","description":null,"message":"Request processed successfully","payment_account":"","call_back_url":"https://7a48-154-159-254-169.ngrok-free.app/?OrderTrackingId=12098069-e581-4c6a-8757-ddc9853b2579&OrderMerchantReference=289384800155860","status_code":0,"merchant_reference":"289384800155860","payment_status_code":"","currency":"KES","error":{"error_type":"api_error","code":"payment_details_not_found","message":"Pending Payment","call_back_url":"https://7a48-154-159-254-169.ngrok-free.app/?OrderTrackingId=12098069-e581-4c6a-8757-ddc9853b2579&OrderMerchantReference=289384800155860"},"status":"500"} -->
