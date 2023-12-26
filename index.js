@@ -45,10 +45,11 @@ let rateLimitMessage = {
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: ({ success: false, message: rateLimiterMessage })
 };
+// app.set('trust proxy', false);
 
 // Rate limiting middleware
-const userLoginAttemptLimiter = rateLimit(rateLimitMessage);
-app.use('/login', (userLoginAttemptLimiter))
+// const userLoginAttemptLimiter = rateLimit(rateLimitMessage);
+// app.use('/login', (userLoginAttemptLimiter))
 
 // generate argent number
 let generateRandomNumbers = function (amount, limit) {
@@ -107,6 +108,35 @@ const authentication = async () => {
     throw error; // Propagate the error up the call stack
   }
 };
+
+app.get('/my_transaction', async (req, res) => {
+  let [workersTransaction] = await dbConnection.execute(
+          "SELECT * FROM `worker_transaction_list` WHERE `workers_transactions`=?",
+          [req.session.worker.workerMobile]
+        );
+        console.log(workersTransaction)
+  try {
+    const authKey = await authentication();
+    const token = `Bearer ${authKey.token}`;
+    const getStatusConfig = {
+      method: 'get',
+      url: getTransactionStatus,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+    };
+
+    const response = await axios(getStatusConfig);
+    const statusData = response.data;
+
+    res.json(statusData); // Send JSON data as the response
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.get('/ipn_list', async (req, res) => {
   try {
@@ -209,6 +239,7 @@ app.post('/signup', async (req, res, next) => {
     if (rows.affectedRows !== 1) {
       return res.render("Your registration has failed.")
     }
+ 
     console.log('data inserted');
     res.json({ success: true, message: 'Data inserted successfully' });
 
@@ -482,66 +513,90 @@ app.post('/register-ipn', async (req, res) => {
 
 
 app.post('/submit-order', async (req, res) => {
-  try {
-    const { amountInput } = req.body;
+  if (req.session.worker) {
+    try {
+      const { amountInput } = req.body;
+  
+      const authKey = await authentication();
+      const token = `Bearer ${authKey.token}`;
+  
+      const merchantReference = Math.floor(Math.random() * 1000000000000000);
+        const phone = 792471415;
+        const countryCode = '254';
+        const callbackUrl = 'https://7a48-154-159-254-169.ngrok-free.app/';
+        const notificationId = '19eb1300-8ba9-46f8-8620-ddc9327f3696';
+        const branch = 'KENCODERS KE';
+        const firstName = 'Nelson';
+        const middleName = 'Lemein';
+        const lastName = 'Kilelo';
+        const emailAddress = 'nelson.lemein@yahoo.com';
+  
+      const data = JSON.stringify({
+        "id": merchantReference,
+        "currency": "KES",
+        "amount": amountInput,
+        "description": "Payment By NELSON",
+        "callback_url": callbackUrl,
+        "notification_id": notificationId,
+        "branch": branch,
+        "billing_address": {
+          "email_address": emailAddress,
+          "phone_number": phone,
+          "country_code": countryCode,
+          "first_name": firstName,
+          "middle_name": middleName,
+          "last_name": lastName,
+          "line_1": "",
+          "line_2": "",
+          "city": "",
+          "state": "",
+          "postal_code": null,
+          "zip_code": null
+        }
+      });
+  
+      const config = {
+        method: 'post',
+        url: SubmitOrderRequest,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+        data: data,
+      };
+  
+      
+      const response = await axios(config);
 
-    const authKey = await authentication();
-    const token = `Bearer ${authKey.token}`;
+      // let [workersTransaction] = await dbConnection.execute(
+        //   "SELECT * FROM `workers` WHERE `worker_mobile_number`=?",
+        //   [req.session.worker]
+        // );
+        
+        
+        // console.log(`from here ${workersTransaction[0].worker_mobile_number}`)
+        // console.log(`from here again ${workersTransaction}`)
+        let myNo = req.session.worker
+        console.log("Worker Mobile Number:", myNo);
 
-    const merchantReference = Math.floor(Math.random() * 1000000000000000);
-      const phone = 792471415;
-      const countryCode = '254';
-      const callbackUrl = 'https://7a48-154-159-254-169.ngrok-free.app/';
-      const notificationId = '19eb1300-8ba9-46f8-8620-ddc9327f3696';
-      const branch = 'KENCODERS KE';
-      const firstName = 'Nelson';
-      const middleName = 'Lemein';
-      const lastName = 'Kilelo';
-      const emailAddress = 'nelson.lemein@yahoo.com';
-
-    const data = JSON.stringify({
-      "id": merchantReference,
-      "currency": "KES",
-      "amount": amountInput,
-      "description": "Payment By NELSON",
-      "callback_url": callbackUrl,
-      "notification_id": notificationId,
-      "branch": branch,
-      "billing_address": {
-        "email_address": emailAddress,
-        "phone_number": phone,
-        "country_code": countryCode,
-        "first_name": firstName,
-        "middle_name": middleName,
-        "last_name": lastName,
-        "line_1": "",
-        "line_2": "",
-        "city": "",
-        "state": "",
-        "postal_code": null,
-        "zip_code": null
+      const [rows] = await dbConnection.execute(
+        "INSERT INTO `worker_transaction_list`(`workers_transactions`,`order_tracking_id`) VALUES (?,?)",[`${req.session.worker.workerMobile}`,response.data.order_tracking_id]
+       );
+      if (rows.affectedRows !== 1) {
+        return res.render("Your order tracking failed.")
       }
-    });
-
-    const config = {
-      method: 'post',
-      url: SubmitOrderRequest,
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data: data,
-    };
-
-    
-    const response = await axios(config);
-
-    console.log(response.data)
-    res.json({ success: true, message: `Order Sent Successfully: Status-${response.data.status}`, paymentURL: response.data.redirect_url });
-  } catch (error) {
-    console.error('Error on Placing order:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+  
+      console.log(response.data)
+      res.json({ success: true, message: `Order Sent Successfully: Status-${response.data.status}`, paymentURL: response.data.redirect_url });
+    } catch (error) {
+      console.error('Error on Placing order:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  }else {
+    // return res.json({ success: false, message: 'Worker Must Log in first...' });
+    res.json({ success: false, message: 'Please LogIn To make payments' });
+    // return res.sendFile(path.join(__dirname, 'public', 'home.html'));
   }
 });
 
