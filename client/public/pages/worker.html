@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>home</title>
+    <script src="../src/js/htmx.min.js"></script>
+    <link rel="stylesheet" href="../src/styles/tailwind.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="sweetalert2.min.css.css">
+    <link rel="stylesheet" href="../src/styles/footer.css">
+    <link rel="stylesheet" href="../src/styles/styles.css">
+    <link rel="stylesheet" href="../src/styles/card-style.css">
+</head>
+<body>
+  <header
+  class="fixed inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md border border-gray-100 bg-white/80 py-1 shadow backdrop-blur-lg md:top-6 md:rounded-3xl lg:max-w-screen-lg">
+  <nav
+      class="relative px-4 py-1 flex justify-between items-center dark:bg-gray-800 border-b-2 dark:border-gray-600">
+  
+      <div class="flex flex-shrink-0 items-center">
+        <img class="h-10 w-auto rounded-md" src="../src/media//kepas-round-colored.png" alt="Your Company">
+      </div>
+  
+      <div class="lg:hidden">
+          <button class="navbar-burger flex items-center text-violet-600 dark:text-gray-100 p-1" id="navbar_burger">
+                  <svg class="block h-6 w-6 fill-current" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                      <title>Hamberger menu</title>
+                      <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path>
+                  </svg>
+          </button>
+      </div>
+  
+      <ul
+          class="hidden absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 lg:mx-auto lg:flex lg:items-center lg:w-auto lg:space-x-6">
+  
+          <li>
+            <a href="#" class="text-gray-800 text-gray px-3 py-2 text-md font-medium" x-state:on="Current" x-state:off="Default" aria-current="page" x-state-description="Current: &quot; text-gray&quot;, Default: &quot;text-gray-300 hover:bg-gray-700 hover:text-gray&quot;">Get Help</a>
+          </li>
+          <li>
+            <a href="#" class="text-gray-800 text-gray px-3 py-2 text-md font-medium" x-state:on="Current" x-state:off="Default" aria-current="page" x-state-description="Current: &quot; text-gray&quot;, Default: &quot;text-gray-300 hover:bg-gray-700 hover:text-gray&quot;">Contact Us</a>
+          </li>
+      </ul>
+  
+  
+      <div class="hidden lg:flex">
+  
+          <button id="theme-toggle" type="button" class="hidden lg:inline-block lg:ml-auto py-1.5 px-3 m-1 text-center bg-gray-100 border border-gray-300 rounded-md text-black  hover:bg-gray-100 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <svg id="theme-toggle-dark-icon" class="w-5 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                  </svg>
+                  <svg id="theme-toggle-light-icon" class="w-5 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path
+                          d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                          fill-rule="evenodd" clip-rule="evenodd"></path>
+                  </svg>
+          </button>
+  
+          <a href="./login.html">
+              <button class=" py-1.5 px-3 m-1 text-center bg-violet-700 border rounded-md text-white  hover:bg-violet-500 hover:text-gray-100 dark:text-gray-200 dark:bg-violet-700 hidden lg:block">
+                      Log In
+              </button>
+          </a>
+  
+          <div>
+              <span class="hidden" id="util_data" data="{{ json_encode($util_data) }}"></span>
+              <a class=" py-1.5 px-3 m-1 text-center bg-gray-100 border border-gray-300 rounded-md text-black  hover:bg-gray-100 dark:text-gray-300 dark:bg-gray-700 hidden lg:inline-block "
+                  href="./signup.html">
+                  Sign Up
+              </a>
+          </div>
+  
+      </div>
+  
+  </nav>
+    <div class="px-4 py-2">
+        <div class="flex items-center justify-between">
+            <div class=" relative text-gray-600 w-full">
+              <input class="border-2 border-gray-300 bg-white w-full h-10 px-5 mx-auto rounded-lg text-sm focus:outline-none dark:placeholder-gray-200 dark:bg-gray-500 dark:border-gray-50" type="search" name="search" placeholder="Search profession,occupation,place,skill,etc">
+  
+              <button type="submit" class="absolute right-0 top-0 mt-3 mr-4">
+                      <svg class="text-gray-600 dark:text-gray-200 h-4 w-4 fill-current"
+                          xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+                          x="0px" y="0px" viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;"
+                          xml:space="preserve" width="512px" height="512px">
+                          <path
+                              d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+                      </svg>
+              </button>
+  
+          </div>
+        </div>
+    </div>
+</header>
+
+
+
+<!-- mobile navbar -->
+<div class="navbar-menu relative z-50 hidden">
+    <div class="navbar-backdrop fixed inset-0 bg-gray-800 opacity-50"></div>
+    <nav
+        class="fixed bg-white dark:bg-gray-600 top-0 left-0 bottom-0 flex flex-col w-5/6 max-w-sm py-6 px-6 border-r overflow-y-auto">
+
+        <div class="flex items-center mb-8">
+            <a class="mr-auto text-2xl font-bold text-black text-violet-600 dark:text-gray-100"
+                href="https://tailwindflex.com/">
+                TailwindFlex
+            </a>
+
+            <button class="navbar-close">
+                    <svg class="h-6 w-6 text-gray-400 cursor-pointer hover:text-gray-500"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+            </button>
+        </div>
+
+        <div class=" relative mx-auto text-gray-600">
+            <input class="border-2 border-gray-300 bg-white h-10 px-5 pr-20 rounded-lg text-sm focus:outline-none dark:placeholder-gray-200 dark:bg-gray-500 dark:border-gray-50" type="search" name="search" placeholder="Search profession,occupation,place,skill,etc">
+
+            <button type="submit" class="absolute right-0 top-0 mt-3 mr-4">
+                    <svg class="text-gray-600 dark:text-gray-200 h-4 w-4 fill-current"
+                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+                        x="0px" y="0px" viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;"
+                        xml:space="preserve" width="512px" height="512px">
+                        <path
+                            d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+                    </svg>
+            </button>
+
+        </div>
+
+        <div class="mt-auto">
+
+            <div class="pt-6">
+                <button id="theme-toggle-2" type="button" class=" py-2.5 w-[97.6%] mb-3 rounded-xl flex justify-center align-middle py-1.5 px-3 m-1 text-center bg-gray-100 border border-gray-300 rounded-md text-black  hover:bg-gray-100 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <svg id="theme-toggle-dark-icon-2" class="w-6 h-6 hidden" fill="currentColor"
+                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg id="theme-toggle-light-icon-2" class="w-6 h-6 hidden" fill="currentColor"
+                            viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                                fill-rule="evenodd" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+
+                <a class="block py-1.5 px-3 m-1 text-center bg-gray-100 border border-gray-300 rounded-md text-black  hover:bg-gray-100 dark:text-gray-300 dark:bg-gray-700 px-4 py-3 mb-3 text-sm text-center font-semibold rounded-xl"
+                    href="./signup.html">
+                    Sign Up
+                </a>
+
+                <a class="block py-1.5 px-3 m-1 text-center bg-violet-700 border rounded-md text-white  hover:bg-violet-500 hover:text-gray-100 dark:text-gray-200 dark:bg-violet-700 px-4 py-3 mb-2 text-xs text-center text-white font-semibold bg-violet-600 hover:bg-violet-700  rounded-xl"
+                    href="./login.html">
+                    Log In
+                </a>
+
+            </div>
+            <p class="my-4 text-xs text-center text-gray-400">
+                <span>TailwindFlex Copyright © 2023</span>
+            </p>
+        </div>
+    </nav>
+</div>
+
+
+
+    <div class="main inset-x-0 top-0 z-30 mx-auto w-full max-w-screen-md py-1 xl:max-w-screen-xl">
+      <div class="text-center">
+        <h1 class="text-2xl font-bold my-5">Simple Request Example</h1>
+        <!-- <button
+          hx-get="/my_transaction"
+          hx-target="#users"
+          hx-indicator="#loading"
+          hx-vals='{"limit": 3}'
+          class="bg-blue-500 text-white py-2 px-3 my-5 rounded-lg"
+        >
+          Fetch Users
+        </button> -->
+  
+        
+  
+        <div id="users"></div>
+      </div>
+      <div class="tab-content" hx-get="/api/workers" hx-target="#data"  hx-indicator="#loading"
+      hx-trigger="load">
+        <ul class="cards-apartment" id="data">
+            <li>
+          <span class="htmx-indicator" id="loading">
+            <img src="../src/media/loader.gif" alt="Loading..." class="m-auto h-10" />
+          </span>
+
+            </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+          <li>
+            <div class="card-apartment">
+              <img src="https://i.imgur.com/oYiTqum.jpg" class="card__image" alt="" />
+              <div class="worker-work">
+                <div class="left-description">
+                  <div>My Recent Work</div>
+                </div>
+                <div class="reting">0.4</div>
+              </div>
+              <div class="card__overlay-apartment">
+                <p class="card__head-apartment">Worker Full Names</p>
+                <p class="card__info-apartment">Apartment Description...</p>
+                <p class="card__date-apartment">Jan 18-2024 .by Nelson . online</p>
+                <p class="card__price-apartment">Price: $40 night</p>
+              </div>
+            </div>      
+          </li>
+        </ul>
+      </div>
+    </div>
+
+
+
+
+      <footer class="flex-rw">
+  
+        <ul class="footer-list-top">
+          <li>
+            <h4 class="footer-list-header">About Pavilion</h4></li>
+          <li><a href='/shop/about-mission' class="generic-anchor footer-list-anchor" itemprop="significantLink">GET TO KNOW US</a></li>
+          <li><a href='/promos.html' class="generic-anchor footer-list-anchor" itemprop="significantLink">PROMOS</a></li>
+          <li><a href='/retailers/new-retailers.html' class="generic-anchor footer-list-anchor" itemprop="significantLink">BECOME A RETAILER</a></li>
+      
+          <li><a href='/job-openings.html' itemprop="significantLink" class="generic-anchor footer-list-anchor">JOB OPENINGS</a></li>
+      
+          <li><a href='/shop/about-show-schedule' class="generic-anchor footer-list-anchor" itemprop="significantLink">EVENTS</a></li>
+        </ul>
+        <ul class="footer-list-top">
+          <li>
+            <h4 class="footer-list-header">The Gift Selection</h4></li>
+      
+      
+          <li><a href='/Angels/cat/id/70' class="generic-anchor footer-list-anchor">ANGEL FIGURINES</a></li>
+          <li><a href='/Home-Decor/cat/id/64' class="generic-anchor footer-list-anchor">HOME DECOR</a></li>
+          <li><a href='/Mugs/cat/id/32' class="generic-anchor footer-list-anchor">MUGS</a></li>
+          <li><a href='/Pet-Lover/cat/id/108' class="generic-anchor footer-list-anchor">PET LOVER</a></li>
+          <li><a href='/Ladies-Accessories/cat/id/117' class="generic-anchor footer-list-anchor" target="_blank">HANDBAGS & JEWELRY</a></li>
+        </ul>
+        <ul class="footer-list-top">
+          <li id='help'>
+            <h4 class="footer-list-header">Please Help Me</h4></li>
+          <li><a href='/shop/about-contact' class="generic-anchor footer-list-anchor" itemprop="significantLink">CONTACT</a></li>
+          <li><a href='/faq.html' class="generic-anchor footer-list-anchor" itemprop="significantLink">FAQ</a></li>
+          <li id='find-a-store'><a href='/shop/store-locator' class="generic-anchor footer-list-anchor" itemprop="significantLink">STORE LOCATOR</a></li>
+          <li id='user-registration'><a href='/shop/user-registration?URL=' class="generic-anchor footer-list-anchor" itemprop="significantLink">NEW USERS</a></li>
+          <li id='order-tracking'><a href='/shop/order-status' itemprop="significantLink" class="generic-anchor footer-list-anchor">ORDER STATUS</a></li>
+        </ul>
+        <section class="footer-social-section flex-rw">
+            <span class="footer-social-overlap footer-social-connect">
+            CONNECT <span class="footer-social-small">with</span> US
+            </span>
+            <span class="footer-social-overlap footer-social-icons-wrapper">
+            <a href="https://www.pinterest.com/paviliongift/" class="generic-anchor" target="_blank" title="Pinterest" itemprop="significantLink"><i class="fa fa-pinterest"></i></a>
+            <a href="https://www.facebook.com/paviliongift" class="generic-anchor" target="_blank" title="Facebook" itemprop="significantLink"><i class="fa fa-facebook"></i></a>
+            <a href="https://twitter.com/PavilionGiftCo" class="generic-anchor" target="_blank" title="Twitter" itemprop="significantLink"><i class="fa fa-twitter"></i></a>
+            <a href="http://instagram.com/paviliongiftcompany" class="generic-anchor" target="_blank" title="Instagram" itemprop="significantLink"><i class="fa fa-instagram"></i></a>
+            <a href="https://www.youtube.com/channel/UCYgUODvd0qXbu_LkUWpTVEg" class="generic-anchor" target="_blank" title="Youtube" itemprop="significantLink"><i class="fa fa-youtube"></i></a>
+            <a href="https://plus.google.com/+Paviliongift/posts" class="generic-anchor" target="_blank" title="Google Plus" itemprop="significantLink"><i class="fa fa-google-plus"></i></a>
+            </span>
+        </section>
+        <section class="footer-bottom-section flex-rw">
+      <div class="footer-bottom-wrapper">   
+      <i class="fa fa-copyright" role="copyright">
+       
+      </i> 2019 Pavilion in <address class="footer-address" role="company address">Bergen, NY</address><span class="footer-bottom-rights"> - All Rights Reserved - </span>
+          </div>
+          <div class="footer-bottom-wrapper">
+          <a href="/terms-of-use.html" class="generic-anchor" rel="nofollow">Terms</a> | <a href="/privacy-policy.html" class="generic-anchor" rel="nofollow">Privacy</a>
+            </div>
+        </section>
+      </footer>
+    <script src="./sweetalert2@11.min.js"></script>
+    <script>
+      if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+              document.documentElement.classList.add('dark');
+          } else {
+              document.documentElement.classList.remove('dark');
+          }
+  
+  
+          var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+          var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+  
+          var themeToggleDarkIcon_2 = document.getElementById('theme-toggle-dark-icon-2');
+          var themeToggleLightIcon_2 = document.getElementById('theme-toggle-light-icon-2');
+  
+          // Change the icons inside the button based on previous settings
+          if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia(
+              '(prefers-color-scheme: dark)').matches)) {
+              themeToggleLightIcon.classList.remove('hidden');
+              if (themeToggleDarkIcon_2) {
+                  themeToggleLightIcon_2.classList.remove('hidden');
+              }
+          } else {
+              themeToggleDarkIcon.classList.remove('hidden');
+              if (themeToggleDarkIcon_2) {
+                  themeToggleDarkIcon_2.classList.remove('hidden');
+              }
+          }
+    
+          var themeToggleBtn_2 = document.getElementById('theme-toggle-2');
+          if (themeToggleBtn_2) {
+  
+              themeToggleBtn_2.addEventListener('click', function () {
+  
+                  // toggle icons inside button
+                  themeToggleDarkIcon_2.classList.toggle('hidden');
+                  themeToggleLightIcon_2.classList.toggle('hidden');
+  
+                  sync_theme()
+  
+              });
+          }
+  
+  
+          var themeToggleBtn = document.getElementById('theme-toggle');
+  
+          themeToggleBtn.addEventListener('click', function () {
+  
+              // toggle icons inside button
+              themeToggleDarkIcon.classList.toggle('hidden');
+              themeToggleLightIcon.classList.toggle('hidden');
+  
+              sync_theme()
+  
+  
+          });
+  
+          function sync_theme() {
+              // if set via local storage previously
+              if (localStorage.getItem('color-theme')) {
+                  if (localStorage.getItem('color-theme') === 'light') {
+                      document.documentElement.classList.add('dark');
+                      localStorage.setItem('color-theme', 'dark');
+                  } else {
+                      document.documentElement.classList.remove('dark');
+                      localStorage.setItem('color-theme', 'light');
+                  }
+                  // if NOT set via local storage previously
+              } else {
+                  if (document.documentElement.classList.contains('dark')) {
+                      document.documentElement.classList.remove('dark');
+                      localStorage.setItem('color-theme', 'light');
+                  } else {
+                      document.documentElement.classList.add('dark');
+                      localStorage.setItem('color-theme', 'dark');
+                  }
+              }
+  
+          }
+  
+          document.addEventListener('DOMContentLoaded', function () {
+              // open
+              const burger = document.querySelectorAll('.navbar-burger');
+              const menu = document.querySelectorAll('.navbar-menu');
+  
+              if (burger.length && menu.length) {
+                  for (var i = 0; i < burger.length; i++) {
+                      burger[i].addEventListener('click', function () {
+                          for (var j = 0; j < menu.length; j++) {
+                              menu[j].classList.toggle('hidden');
+                          }
+                      });
+                  }
+              }
+  
+              // close
+              const close = document.querySelectorAll('.navbar-close');
+              const backdrop = document.querySelectorAll('.navbar-backdrop');
+  
+              if (close.length) {
+                  for (var i = 0; i < close.length; i++) {
+                      close[i].addEventListener('click', function () {
+                          for (var j = 0; j < menu.length; j++) {
+                              menu[j].classList.toggle('hidden');
+                          }
+                      });
+                  }
+              }
+          
+  
+              if (backdrop.length) {
+                  for (var i = 0; i < backdrop.length; i++) {
+                      backdrop[i].addEventListener('click', function () {
+                          for (var j = 0; j < menu.length; j++) {
+                              menu[j].classList.toggle('hidden');
+                          }
+                      });
+                  }
+              }
+          });
+  </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Reset</title>
+  <link rel="stylesheet" href="./../sweetalert2.min.css.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="main-body">
+    <h1>Verify Account</h1><br>
+    <p>We sent a verification code to your email <b><span id="conEmail"></span></b></p>
+    <br>
+  
+  <!-- Request Reset Code Form -->
+  <form id="requestVerifyAccountForm">
+    <label for="workerAccountVerification">Enter Verification Number:</label>
+    <input type="number" id="workerAccountVerification" name="workerAccountVerification" ><br>
+    <br>
+    <button type="submit">Verify Account</button>
+  </form>
+  <br>
+  <p>Didn't get verification code? <button id="resendVerificationBtn">Resend Verification Code</button></p>
+  
+  <script>
+    document.getElementById('requestVerifyAccountForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const workerAccountVerification = document.getElementById('workerAccountVerification').value;
+
+      try {
+        // Request a reset code from the server
+        const response = await fetch('/account-verification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ workerAccountVerification }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        
+
+        // Display a message to the user using SweetAlert2
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Account Verified successfully',
+          }).then(() => {
+            // Redirect to the login page
+            window.location.href = '/login.html';
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message,
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An unexpected error occurred',
+        });
+      }
+    });
+  </script>
+<script src="./../sweetalert2@11.min.js"></script>
+</body>
+</html>

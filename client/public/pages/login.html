@@ -6,6 +6,12 @@
   <title>Login Page</title>
   <link rel="stylesheet" href="sweetalert2.min.css.css">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    #phoneInput {
+        padding: 10px;
+        font-size: 16px;
+    }
+</style>
 </head>
 <body>
   <div class="main-body">
@@ -14,6 +20,12 @@
       <form id="loginForm">
         <label for="workerMobile">Enter Mobile Number:</label>
         <input type="tel" id="workerMobileNumber" name="workerMobile" required>
+        <select id="phoneDropdown" style="display: none;">
+          <option value="Select Number">Select Number</option>
+          <option value="0741642093">0741642093</option>
+          <option value="0113913631">0113913631</option>
+          <option value="0792471415">0792471415</option>
+        </select>
         <label for="password">Password:</label>
         <input type="password" id="workerPassword" name="workerPassword" required>
         <p><a href="./reset-password.html">Forgot Password?</a></p>
@@ -48,13 +60,20 @@
         if (data.success) {
           Swal.fire({
             icon: 'success',
-            title: 'You Are Now In!',
-            text: 'Congrats!... you have successfully loged in',
+            title: 'SUCCESS',
+            text: data.message,
           }).then(() => {
-            // Redirect to the dashboard page
             window.location.href = '/worker/dashboard';
           });
           return
+        }else if(data.notVerified == true){
+          Swal.fire({
+            icon: 'error',
+            title: 'Not Verified',
+            text: data.message,
+          }).then(() => {
+            window.location.href = '/verify-account.html';
+          });
         } else {
           Swal.fire({
             icon: 'error',
@@ -66,7 +85,25 @@
         console.error('Error:', error);
       }
     });
+
+    document.getElementById('workerMobileNumber').addEventListener('click', function() {
+        var dropdown = document.getElementById('phoneDropdown');
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    // Update input value when a dropdown option is selected
+    document.getElementById('phoneDropdown').addEventListener('change', function() {
+        var selectedNumber = this.value;
+        document.getElementById('workerMobileNumber').value = selectedNumber;
+
+        // Hide the dropdown after selection
+        this.style.display = 'none';
+    });
   </script>
-  <script src="./sweetalert2@11.min.js"></script>
+      <script src="./sweetalert2@11.min.js"></script>
 </body>
 </html>

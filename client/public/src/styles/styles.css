@@ -1,0 +1,250 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    line-height: 1.5;
+    font-family: 'Open Sans', sans-serif;
+}
+
+html, body{
+    margin: 0;
+    padding: 0;
+    line-break: strict;
+}
+html{
+  font-family: "Roboto", sans-serif;
+  color: #f3f3f3;
+  font-weight: 400;
+  text-align: left;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Signup and login pages */
+.main-body{
+    margin: 10rem auto;
+    max-width: 21em;
+}
+
+#signupForm,
+#loginForm,
+#requestResetForm{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: .6rem;
+}
+
+#signupForm input,
+#loginForm input,
+#requestResetForm input{
+    padding: .6rem 1rem;
+    border-radius: 6px;
+    border: 1px solid darkolivegreen;
+}
+
+#signupForm button,
+#loginForm button,
+#requestResetForm button{
+    padding: .6rem;
+    border-radius: 6px;
+    border: 1px solid rgb(0, 2, 117);
+    background-color: black;
+    color: #fff;
+}
+/* End of signup and login page */
+
+
+/* TOP NAV AND TABS */
+body {
+    font-family: Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1.43;
+    color: #222;
+    background-color: #fff;
+    -webkit-font-smoothing: antialiased;
+}
+.container{
+    padding-right:8rem !important;
+    padding-left:8rem !important;
+}
+#user-button{
+    padding: 1rem;
+    font-size: large;
+    user-select: none;
+    /* box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); */
+    border-radius: 30px;
+    border: 1px solid #92c64e;
+    line-height: 20Px;
+}
+#navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: #fff;
+  z-index: 1000;
+}
+
+.section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* padding: 10px; */
+}
+
+#section1{
+  background: #f8f8f8;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem .3rem;
+}
+#section1 a {
+  text-align: center;
+  color: black;
+  text-decoration: none;
+}
+
+#section2 {
+  background: rgba(255, 255, 255, 0.9);
+  border-top: 1px solid #dddddd96;
+  /* border-bottom: 1px solid #dddddd96; */
+  /* box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); */
+  padding: calc(0% + .5rem) 0;
+}
+
+#section2 img {
+    height: 33px;
+    margin-right: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+}
+
+.button-group {
+  transform: skew(345deg);
+  gap: 0.3rem;
+  display: flex;
+  background: transparent;
+}
+
+.button {
+  padding: .3rem .9rem;
+  margin: 0;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  letter-spacing: .09rem;
+  font-size: .875rem;
+  font-weight: 600;
+}
+
+#user-menu {
+  background: #fff;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  position: absolute;
+  right: calc(8rem);
+  top: calc(90% + 3px);
+  width: calc(10rem);
+  display: none;
+}
+
+#user-menu a {
+  display: block;
+  padding: 10px;
+  text-decoration: none;
+  color: #333;
+}
+
+#section3 {
+    padding: calc(0% + 1rem) 0;
+  position: sticky;
+  top: 0;
+  background-color: #333;
+}
+
+.tab {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: .9rem;
+    display: inline-block;
+    transform: skew(9deg);
+    /* background: #ff385d4b; */
+    /* background: #ff385c; */
+    border: 1px solid #92c64e;
+}
+
+.tab.active {
+  background-color: #0074dd;
+  /* background-color: #ff385c; */
+  color: #fff;
+}
+
+.tab-content {
+  padding: 0;
+  margin: 0 auto;
+}
+.main{
+  margin-top: calc(9rem);
+}
+.pr-16{
+  padding-right: 18rem;
+}
+.border-gray-300 {
+  color: #68423d;
+  border-color: #68423d;
+  font-weight: 600;
+}
+.bg-violet-700 {
+  background-color: #3c73a8;
+}
+.worker-nav,.apartments-nav,.lands-nav,.farm-products-nav,.art-nav{
+    background-color:#fff;
+    display: none;
+    padding: 1rem 0;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgb(146 198 78 / 12%) 0px 0px 0px 1px;
+}
+
+.worker-nav a,.apartments-nav a,.lands-nav a,.farm-products-nav a,.art-nav a{
+    color: #000000;
+}
+
+
+
+
+@media (min-width: 1024px){
+  .tab-content {
+      max-width: 1024px;
+  }
+}
+
+/* END OF TOP NAV AND TABS */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* <!-- box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px; -->
+<!-- box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px; -->
+<!-- box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgb(209, 213, 219) 0px 0px 0px 1px inset; -->
+<!-- box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0.9) 0px 0px 0px 1px; -->
+<!-- box-shadow: rgba(3, 102, 214, 0.3) 0px 0px 0px 3px; -->
+<!-- box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px; -->
+
+<!-- box-shadow: rgba(17, 17, 26, 0.05) 0px 1px 0px, rgba(17, 17, 26, 0.1) 0px 0px 8px; --> */

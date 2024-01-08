@@ -92,7 +92,7 @@ const ui_error404 = `<style>body {
         </svg>
         <div class="message-box">
         <h1>404</h1>
-        <p>Page not found</p>
+        <p>Page not found. Pleace check url</p>
         <div class="buttons-con">
         <div class="action-link-wrap">
         <a onclick="history.back(-1)" class="link-button link-back-button">Go Back</a>

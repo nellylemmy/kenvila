@@ -22,6 +22,9 @@
       <label for="workerMobile">Enter Mobile Number:</label>
       <input type="tel" id="workerMobile" name="workerMobile" required>
 
+      <label for="workerEmail">Enter Email:</label>
+      <input type="email" id="workerEmail" name="workerEmail" required>
+
       <label for="workerPassword">Enter Password (6 characters minimum):</label>
       <input type="password" id="workerPassword" name="workerPassword" pattern=".{6,}" required>
 
@@ -45,6 +48,7 @@
       const workerFirstName = document.getElementById('workerFirstName').value;
       const workerLastName = document.getElementById('workerLastName').value;
       const workerMobile = document.getElementById('workerMobile').value;
+      const workerEmail = document.getElementById('workerEmail').value;
       const workerPassword = document.getElementById('workerPassword').value;
       const workerRepeatPassword = document.getElementById('workerRepeatPassword').value;
 
@@ -65,7 +69,7 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ workerFirstName, workerLastName, workerMobile, workerPassword }),
+          body: JSON.stringify({ workerFirstName, workerLastName, workerMobile, workerEmail, workerPassword }),
         });
 
         const data = await response.json();
@@ -76,10 +80,10 @@
           Swal.fire({
             icon: 'success',
             title: 'Signup successful!',
-            text: 'Congrats!... you have successfully created an account. Please Enter the code that we sent to your number',
+            text: data.message,
           }).then(() => {
             // Redirect to the login page
-            window.location.href = '/login.html';
+            window.location.href = '/verify-account.html';
           });
           // Redirect to the login page or another page if needed
         } else {

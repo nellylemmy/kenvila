@@ -1,217 +1,322 @@
-const express = require("express");
-const axios = require('axios');
-const nodemailer = require('nodemailer');
-const app = express();
-const compression = require('compression');
+require('dotenv').config();
 const bodyParser = require('body-parser');
-const dbConnection = require("./utils/dbconnection");
-const path = require('path');
+const compression = require('compression');
 const cors = require('cors');
+const express = require("express");
 const http = require('http');
+const path = require('path');
+const session = require('express-session');
+const MemoryStore = require('memorystore')(session);
 const socketIO = require('socket.io');
+const mysql = require('mysql2');
+const crypto = require('crypto');
+const fs = require('fs');
+const dbConnection = require('./server/utils/dbconnection');
+
+const error404 = require('./server/models/ui_error404');
+const workerSignup = require('./server/routes/workerSignup');
+const workerLogin = require('./server/routes/workerLogin');
+const resetPasswordRequest = require('./server/routes/resetPasswordRequest');
+const resetPasswordVerify = require('./server/routes/resetPasswordVerify');
+const getMyTransactions = require('./server/routes/getMyTransactions');
+const userLoginAttemptLimiter = require('./server/routes/rateLimiterConfig');
+const getIpnList = require('./server/routes/getIpnList');
+const insertData = require('./server/routes/insertData');
+const accountVerification = require('./server/routes/accountVerification');
+const registerIpn = require('./server/routes/registerIpn');
+const submitOrder = require('./server/routes/submitOrder');
+// require('./server/routes/insertData');
+
+const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
-const session = require('express-session');
-const rateLimit = require('express-rate-limit');
-const bcrypt = require('bcryptjs');
-const randomstring = require('randomstring');
-const error404 = require('./ui_error404');
-const rateLimiterMessage = require('./rateLimiterMessage');
 
-require('dotenv').config();
+// Set static folder
 
 app.use(compression({ level: 6, threshold: 0 }));
-app.use(express.static('public'));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('client/public'));
+app.use(express.static(path.join(__dirname, 'client/public')));
+app.use(express.static(path.join(__dirname, 'client/public/pages')));
+app.use(express.static(path.join(__dirname, 'client/public/src/js')));
+app.use(express.static(path.join(__dirname, 'client/public/src/media')));
+app.use(express.static(path.join(__dirname, 'client/public/src/styles')));
+app.use(express.static(path.join(__dirname, 'client/public/src/components')));
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(session({
-  name: 'session',
+  store: new MemoryStore({
+    checkPeriod: 86400000, // prune expired entries every 24h
+  }),
   secret: 'your-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: {
-    maxAge: 60000000, // Set the maximum age of the session cookie to 1 minute (60,000 milliseconds)
-    secure: false, // Ensure that the session cookie is only sent over HTTPS
-    // sameSite: 'strict' // Enforce strict same-site policy for the session cookie
-  }
 }));
+app.set('trust proxy', false);
 
-let rateLimitMessage = {
-  windowMs: 3 * 60 * 1000, // 6 minutes
-  max: 4, // Limit each IP to 20 requests per `window` (here, per 6 minutes)
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  message: ({ success: false, message: rateLimiterMessage })
+const PORT = 3000;
+const randomString = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+console.log(randomString())
+
+// Simple encryption function
+
+// const insertData = async (req, res, io) => {
+//   // const { workerFirstName, workerLastName, workerMobile } = req.body;
+//   const workerFirstName = 'nelson'
+//   const workerLastName = 'lemein'
+//   const workerMobile = '0741'
+//   if (req.session.worker) {
+//     console.log('worker', req.session.worker);
+//       }
+
+//   if (!workerFirstName || !workerLastName || !workerMobile) {
+//     return res.status(400).json({ error: 'All input values are required' });
+//   }
+
+//   try {
+
+//     res.json({ success: true, message: 'Redirect user to the main dashboard' }); 
+//       let firstName = workerFirstName
+//       let lastName = workerLastName
+
+//       const fullNames = `${firstName} ${lastName}`
+//       io.emit('fetchUserData', { workerFirstName, workerLastName, workerMobile });
+      
+
+//     // const query = 'INSERT INTO workers (worker_first_name, worker_last_name, worker_mobile_number) VALUES (?,?,?)';
+//     // await dbConnection.query(query, [workerFirstName, workerLastName, workerMobile]);
+
+//     // Emit a message to all connected clients with the new data
+
+//     return res.json({
+//       success: true,
+//       message: 'User data fetched successfully',
+//       name: fullNames,
+//       phoneNumber: workerMobile
+//     });
+//   } catch (err) {
+//     console.error('Error inserting data into MySQL: ', err);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+function encrypt(text) {
+  // Generate a random 16-byte initialization vector
+  const iv = crypto.randomBytes(32);
+  const cipher = crypto.createCipheriv('aes-256-cbc', encryptionKey, iv);
+
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+
+  // Return both the encrypted text and the initialization vector
+  return { encrypted, iv: iv.toString('hex') };
+}
+
+
+
+const algorithm = 'aes-192-cbc';
+const password = '793553d5229621cbf9e241c529125c1b7c3723bff47eea888062007add5aa7';
+const encryptionKey = crypto.scryptSync(password, 'GfG', 24)
+const iv = Buffer.alloc(16, 3);
+
+function encryptedText(text) {
+    const cipher = crypto.createCipheriv(algorithm, encryptionKey, iv);
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return encrypted;
+  }
+  
+  function decryptedText(text) {
+    const decipher = crypto.createDecipheriv(algorithm, encryptionKey, iv);
+    let decrypted = decipher.update(text, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  }
+
+// Socket.io logic
+// io.on('connection', socket => {
+//   console.log('User connected');
+//   socket.emit('message', buildMsg(ADMIN, "Welcome to Chat App!"))
+
+//   socket.on('login', userId => {
+//     socket.join(userId);
+//   });
+
+//   socket.on('message', async data => {
+//     let user_encryptedText = encryptedText(data.text);
+//     let user_dycriptedText = decryptedText(user_encryptedText);
+
+//     console.log(`Encrypted text: ${user_encryptedText}`);
+//     console.log(`Dycripted text: ${user_dycriptedText}`);
+
+//     io.to(data.room).emit('message', { userId: data.userId, text: user_dycriptedText, type: 'text' });
+//   });
+// });
+
+const ADMIN = "Admin";
+const UsersState = {
+  users: [],
+  setUsers: function (newUsersArray) {
+    this.users = newUsersArray;
+  },
 };
 
 
-// Rate limiting middleware
-app.set('trust proxy', false);
-const userLoginAttemptLimiter = rateLimit(rateLimitMessage);
-app.use('/login', (userLoginAttemptLimiter))
 
-let generateRandomNumbers = function (amount, limit) {
-  var result = [],
-    memo = {};
 
-  while (result.length < amount) {
-    var num = Math.floor((Math.random() * limit) + 1);
-    if (!memo[num]) { memo[num] = num; result.push(num); };
-  }
-  return result;
-}
 
-// Create a nodemailer transporter with your email service credentials
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'nelsonlemmy61@gmail.com', // Your email address
-    pass: 'gczo voeo auqv fpci'   // Your email password
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
 
-const sendVerificationEmail = (email, verificationCode) => {
-  // Define the email content
-  const mailOptions = {
-    from: 'nelsonlemmy61@gmail.com',        // Sender address
-    to: email,                           // Receiver address
-    subject: 'Verification Code',        // Email subject
-    text: `Your verification code is: ${verificationCode}`, // Email body
-  };
 
-  // Send the email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Error sending email:', error);
+
+
+
+
+const users = {};
+
+app.use(express.static('public'));
+
+io.on('connection', (socket) => {
+  socket.on('registerUser', ({ name, phoneNumber }) => {
+    users[phoneNumber] = { socketId: socket.id, name };
+    io.to(socket.id).emit('userRegistered', { name, phoneNumber });
+  });
+
+  socket.on('sendMessage', ({ from, to, message }) => {
+    const recipientSocketId = users[to]?.socketId;
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit('receiveMessage', { from, message });
+      io.to(socket.id).emit('messageSent', { to, message });
     } else {
-      console.log('Email sent:', info.response);
+      io.to(socket.id).emit('userNotValid', { to });
     }
   });
-};
 
-const APP_ENVIRONMENT = 'live'; // sandbox or live
+  socket.on('typing', ({ name }) => {
+    io.emit('userTyping', { name });
+  });
 
-let apiUrl, consumerKey, consumerSecret, ipnRegistrationUrl, SubmitOrderRequest, getIPNList;
+  socket.on('stopTyping', () => {
+    io.emit('userStoppedTyping');
+  });
+});
 
-if (APP_ENVIRONMENT === 'sandbox') {
-  apiUrl = 'https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken'; // Sandbox URL
-  ipnRegistrationUrl = 'https://cybqa.pesapal.com/pesapalv3/api/URLSetup/RegisterIPN';
-  SubmitOrderRequest = 'https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest';
-  getIPNList = 'https://cybqa.pesapal.com/pesapalv3/api/URLSetup/GetIpnList';
-  getTransactionStatus = 'https://cybqa.pesapal.com/pesapalv3/api/Transactions/GetTransactionStatus?orderTrackingId='
-  consumerKey = 'qkio1BGGYAXTu2JOfm7XSXNruoZsrqEW';
-  consumerSecret = 'osGQ364R49cXKeOYSpaOnT++rHs=';
-} else if (APP_ENVIRONMENT === 'live') {
-  apiUrl = 'https://pay.pesapal.com/v3/api/Auth/RequestToken'; // Live URL
-  ipnRegistrationUrl = 'https://pay.pesapal.com/v3/api/URLSetup/RegisterIPN';
-  SubmitOrderRequest = 'https://pay.pesapal.com/v3/api/Transactions/SubmitOrderRequest';
-  getIPNList = 'https://pay.pesapal.com/v3/api/URLSetup/GetIpnList';
-  getTransactionStatus = 'https://pay.pesapal.com/v3/api/Transactions/GetTransactionStatus?orderTrackingId='
-  consumerKey = 'oO1BAVZ9v4v0F9yJ95EEznpommeeFLKW';
-  consumerSecret = 'ldp+6/Np3eWI1mc0RMxdw5co6LU=';
-} else {
-  console.log('Invalid APP_ENVIRONMENT');
-  process.exit(1);
+
+
+
+
+
+
+
+
+
+
+function buildMsg(name, text) { 
+  return {
+      name,
+      text,
+      time: new Intl.DateTimeFormat('default', {
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric'
+      }).format(new Date())
+  }
 }
 
-const authentication = async () => {
-  try {
+// User functions 
+function activateUser(id, name, room) {
+  const user = { id, name, room }
+  UsersState.setUsers([
+      ...UsersState.users.filter(user => user.id !== id),
+      user
+  ])
+  return user
+}
+
+function userLeavesApp(id) {
+  UsersState.setUsers(
+      UsersState.users.filter(user => user.id !== id)
+  )
+}
+
+function getUser(id) {
+  return UsersState.users.find(user => user.id === id)
+}
+
+function getUsersInRoom(room) {
+  return UsersState.users.filter(user => user.room === room)
+}
+
+function getAllActiveRooms() {
+  return Array.from(new Set(UsersState.users.map(user => user.room)))
+}
+
+app.get('/worker/message-room-data', async (req, res) => {
+  if (req.session.worker) {
+    const workerMobile = req.session.worker.workerMobile;
+    const [rows] = await dbConnection.execute('SELECT * FROM `workers` WHERE `worker_mobile_number`=?', [workerMobile]);
+    const fullWorkerName = `${rows[0].worker_first_name} ${rows[0].worker_last_name}`;
+    const activeWorkerMobileNumber = `${rows[0].worker_mobile_number}`;
     const data = {
-      consumer_key: consumerKey,
-      consumer_secret: consumerSecret,
+      name: fullWorkerName,
+      phoneNumber: activeWorkerMobileNumber
     };
 
-    const response = await axios.post(apiUrl, data, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+    io.to(activeWorkerMobileNumber).emit('worker-data', data);
+    
+    
+    io.on('connection', socket => {
+      // Emit a socket event to the user
+      console.log('Emitted worker data to room:', activeWorkerMobileNumber);
+      console.log('User connected:', socket.id);
     });
+    io.on('disconnect', socket => {
+      console.log('User Disconnected:', socket.id);
+    });
+    
 
-    return response.data; // Assuming the authentication key is in the response data
-  } catch (error) {
-    console.error('Error during authentication:', error);
-    throw error; // Propagate the error up the call stack
-  }
-};
-
-app.get('/my_transaction', async (req, res) => {
-  if (req.session.worker) {
-    try {
-      let [workersTransaction] = await dbConnection.execute(
-        "SELECT * FROM `worker_transaction_list` WHERE `workers_transactions`=?",
-        [req.session.worker.workerMobile]
-      );
-      const transactionDataList = [];
-      for (const transaction of workersTransaction) {
-        const authKey = await authentication();
-        const token = `Bearer ${authKey.token}`;
-        const getStatusConfig = {
-          method: 'get',
-          url: `${getTransactionStatus}${transaction.order_tracking_id}`,
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: token,
-          },
-        };
-
-        try {
-          const response = await axios(getStatusConfig);
-          const transactionData = response.data;
-          console.log(JSON.stringify(transactionData));
-          transactionDataList.push(transactionData);
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      res.json(transactionDataList);
-
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
+    return res.json(data);
   } else {
     return res.redirect('/worker');
   }
 });
 
-app.get('/ipn_list', async (req, res) => {
+
+
+app.get('/api/workers', async (req, res) => {
   try {
-    const authKey = await authentication();
-    const token = `Bearer ${authKey.token}`;
-    const getIPNconfig = {
-      method: 'get',
-      url: getIPNList,
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-    };
+    const workerData = await dbConnection.execute('SELECT * FROM `workers`');
 
-    const response = await axios(getIPNconfig);
-    const ipnData = response.data;
+    // Map each worker to their full name and join the results
+    const workerNames = workerData[0].map((worker) => `${worker.worker_first_name} ${worker.worker_last_name}`).join(', ');
 
-    res.json(ipnData); // Send JSON data as the response
+    console.log(workerNames);
+
+    res.json({ workerNames });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
+
+
 app.get('/worker', async (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'worker.html'));
+  if (req.session.worker) {
+    return res.redirect('/worker/dashboard');
+  }
+  res.sendFile(path.join(__dirname, 'client/public/pages', 'worker.html'));
 });
 
-app.get('/', (req, res) => {
+app.get('/worker/message-room', async (req, res) => {
+  if (!req.session.worker) {
+      return res.redirect('/worker');
+    }
+    // res.sendFile(path.join(__dirname, 'client/public/pages', 'messageRoom.html'));
+    return insertData(req, res, io);
+  });
+  
+  app.get('/', (req, res) => {
   if (req.session.worker) {
     return res.redirect('/worker/dashboard');
   } else {
@@ -220,356 +325,39 @@ app.get('/', (req, res) => {
 });
 
 app.get('/worker/dashboard', (req, res) => {
-  // Check if the user is logged in
   if (!req.session.worker) {
     return res.redirect('/worker');
   }
-  // Render the dashboard page for authenticated users
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'client/public/pages', 'dashboard.html'));
 });
+
+app.get('/my_transaction', getMyTransactions);
+app.get('/ipn_list', getIpnList);
+app.get('/worker', async (req, res) => {
+  if (req.session.worker) {
+    return res.redirect('/worker/dashboard');
+  }
+  res.sendFile(path.join(__dirname, 'client/public/pages', 'worker.html'));
+});
+
 app.get('/ipn-register', async (req, res) => {
-  // Render the dashboard page for authenticated users
-  res.sendFile(path.join(__dirname, 'public', 'registerIPN.html'));
+  res.sendFile(path.join(__dirname, 'client/public/pages', 'registerIPN.html'));
 });
-
-// Handle POST requests for signup
-app.post('/signup', async (req, res, next) => {
-  const { workerFirstName, workerLastName, workerMobile, workerPassword } = await req.body;
-  try {
-    // Validate inputs
-    if (workerFirstName.length < 3) {
-      return res.json({ success: false, message: 'First name must be at least 3 characters long' });
-    }
-    if (workerLastName.length < 3) {
-      return res.json({ success: false, message: 'Last name must be at least 3 characters long' });
-    }
-
-    // Check if workerFirstName contains only letters and numbers
-    if (!/^[a-zA-Z0-9]+$/.test(workerFirstName)) {
-      return res.json({ success: false, message: 'First name must contain only letters and numbers' });
-    }
-
-    // Check if workerLastName contains only letters and numbers
-    if (!/^[a-zA-Z0-9]+$/.test(workerLastName)) {
-      return res.json({ success: false, message: 'Last name must contain only letters and numbers' });
-    }
-
-    if (workerPassword.length < 6) {
-      return res.json({ success: false, message: 'Password must be at least 6 characters long' });
-    }
-    const workerHashPassword = await bcrypt.hash(workerPassword, 12);
-    const workerPublicId = generateRandomNumbers(9, 9).join('');
-
-    const [row] = await dbConnection.execute(
-      "SELECT * FROM `workers` WHERE `worker_mobile_number`=?",
-      [workerMobile]
-    );
-
-    if (row.length >= 1) {
-      console.log('This Phone Number has already been used.');
-      return res.json({ success: false, message: 'This Phone Number has already been used.' });
-    }
-
-
-    const [rows] = await dbConnection.execute(
-      "INSERT INTO `workers`(`worker_public_id`,`worker_first_name`,`worker_last_name`,`worker_mobile_number`,`worker_password`) VALUES (?,?,?,?,?)",
-      [workerPublicId, workerFirstName, workerLastName, workerMobile, workerHashPassword]
-    );
-
-
-    if (rows.affectedRows !== 1) {
-      return res.render("Your registration has failed.")
-    }
-
-    console.log('data inserted');
-    res.json({ success: true, message: 'Data inserted successfully' });
-
-  } catch (e) {
-    next(e);
-  }
-
-});
-
-// Handle POST requests for login
-app.post('/login', async (req, res, next) => {
-  const { workerMobile, workerPassword } = await req.body;
-  try {
-    const [rows] = await dbConnection.execute('SELECT * FROM `workers` WHERE `worker_mobile_number`=?', [workerMobile]);
-
-    if (!rows || rows.length === 0) {
-      // Worker with the provided mobile number not found
-      return res.json({ success: false, message: 'Invalid mobile number or password. Please check your entries and try again' });
-    }
-
-    if (rows.length != 1) {
-      return res.json({ success: false, message: 'Invalid mobile number or password. Please check your entries and try again' });
-    }
-
-    const passwordFromDatabase = rows[0].worker_password;
-
-    if (!passwordFromDatabase) {
-      // Database entry for worker does not have a password (handle this case based on your application logic)
-      return res.json({ success: false, message: 'Invalid mobile number or password' });
-    }
-
-    const checkPass = await bcrypt.compare(workerPassword, passwordFromDatabase);
-
-    if (checkPass === true) {
-      req.session.worker = { workerMobile };
-      res.json({ success: true, message: 'redirect user to main dashboard' });
-    } else {
-      return res.json({ success: false, message: 'Invalid mobile number or password' });
-    }
-
-  }
-  catch (e) {
-    next(e);
-  }
-});
-
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => err);
-  res.redirect('/');
+  res.redirect('/worker');
 });
 
-app.post('/api/data', async (req, res) => {
-  const { workerFirstName, workerLastName, workerMobile } = req.body;
-
-  if (!workerFirstName || !workerLastName || !workerMobile) {
-    return res.status(400).json({ error: 'All input values are required' });
-  }
-
-  try {
-    const query = 'INSERT INTO workers (worker_first_name, worker_last_name, worker_mobile_number) VALUES (?,?,?)';
-    await dbConnection.query(query, [workerFirstName, workerLastName, workerMobile]);
-
-    // Emit a message to all connected clients with the new data
-    io.emit('newData', { workerFirstName, workerLastName, workerMobile });
-
-    res.json({ success: true, message: 'Data inserted successfully' });
-  } catch (err) {
-    console.error('Error inserting data into MySQL: ', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-const expirationTimeInMinutes = 1; // Set the expiration time for the reset code
-
-// Route to request a password reset
-app.post('/reset-password/request', async (req, res) => {
-  const { workerMobile } = req.body;
-  const [rows] = await dbConnection.execute('SELECT * FROM `workers` WHERE `worker_mobile_number`=?', [workerMobile]);
-
-  if (!rows || rows.length === 0) {
-    // Worker with the provided mobile number not found
-    return res.json({ success: false, message: 'Invalid mobile number. Please check your number and try again' });
-  }
-
-  // Generate a random reset code (you can customize the length as needed)
-  const resetCode = randomstring.generate({
-    length: 6,
-    charset: 'numeric',
-  });
-
-  // Store the reset code in the session (you may want to use a more persistent storage)
-  req.session.resetCode = resetCode;
-  req.session.resetMobile = workerMobile;
-  req.session.resetTimestamp = Date.now();
-  
-  // Send the reset code to the worker (you can use a SMS service for a real application)
-  console.log(`Reset code for ${workerMobile}: ${resetCode}`);
-  sendVerificationEmail(rows[0].worker_email, resetCode)
-
-  res.json({ success: true, message: 'Reset code sent successfully' });
-});
-
-
-// Route to verify the reset code and update the password
-app.post('/reset-password/verify', async (req, res) => {
-  const { resetCode, newPassword } = req.body;
-
-  // Check if the reset code matches the one stored in the session
-  if (resetCode !== req.session.resetCode) {
-    return res.json({ success: false, message: 'Invalid reset code. Reset code usually expires. Please request anew one' });
-  }
-
-  // Check if the reset code has expired
-  const currentTime = Date.now();
-  const resetTimestamp = req.session.resetTimestamp || 0;
-  const elapsedTime = (currentTime - resetTimestamp) / (1000 * 60); // Convert milliseconds to minutes
-
-  if (elapsedTime > expirationTimeInMinutes) {
-    // Reset code has expired
-    delete req.session.resetCode;
-    delete req.session.resetMobile;
-    delete req.session.resetTimestamp;
-    return res.json({ success: false, message: 'Reset code has expired' });
-  }
-
-  // Find the worker based on the mobile number stored in the session
-  // const worker = workersDatabase.find(w => w.workerMobile === req.session.resetMobile);
-  if (!req.session.resetMobile) {
-    return res.json({ success: false, message: 'Worker not found' });
-  }
-
-  if (newPassword.length < 6) {
-    return res.json({ success: false, message: 'Password must be at least 6 characters long' });
-  }
-
-  // Hash the new password
-  const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-  // Update the worker's password in the database (you may want to use a more secure storage)
-  const [rows] = await dbConnection.execute('SELECT * FROM `workers` WHERE `worker_mobile_number`=?', [req.session.resetMobile]);
-
-  const passwordFromSession = rows[0].worker_password;
-
-  if (!passwordFromSession) {
-    // Database entry for worker does not have a password (handle this case based on your application logic)
-    return res.json({ success: false, message: 'Invalid mobile number' });
-  }
-  dbConnection.execute("UPDATE `workers` SET `worker_password` =? WHERE `worker_mobile_number`=?", [hashedPassword, req.session.resetMobile]);
-
-  // worker.workerPassword = hashedPassword;
-
-  // Clear the reset code, mobile, and timestamp from the session
-  delete req.session.resetCode;
-  delete req.session.resetMobile;
-  delete req.session.resetTimestamp;
-
-  console.log('Password reset successful')
-  res.json({ success: true, message: 'Password reset successful. Log in with your number and the new password' });
-});
-
-//==========================================================================
-//  PESAPAL API START
-//==========================================================================
-
-// Handle POST requests for login
-app.post('/register-ipn', async (req, res) => {
-  try {
-    const { ipnInput } = req.body;
-
-    const authKey = await authentication();
-    const token = `Bearer ${authKey.token}`;
-
-    const data = JSON.stringify({
-      url: ipnInput,
-      ipn_notification_type: 'GET',
-    });
-
-    const config = {
-      method: 'post',
-      url: ipnRegistrationUrl,
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        Authorization: token,
-      },
-      data: data,
-    };
-
-    const response = await axios(config);
-    res.json({ success: true, message: `IPN registration successful URL: ${response.data.url}, IPN_ID: ${response.data.ipn_id}` });
-  } catch (error) {
-    console.error('Error during IPN registration:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-app.post('/submit-order', async (req, res) => {
-  if (req.session.worker) {
-    try {
-      const { amountInput } = req.body;
-
-      const authKey = await authentication();
-      const token = `Bearer ${authKey.token}`;
-
-      function removeLeadingZeros(numberString) {
-        // Use parseInt to remove leading zeros
-        const result = parseInt(numberString, 10);
-
-        // Convert the result back to a string to handle cases where the input is not a valid number
-        return result.toString();
-      }
-
-      // Example usage:
-      const phoneNumber = req.session.worker.workerMobile;
-      const formattedPhoneNumber = removeLeadingZeros(phoneNumber);
-      console.log(formattedPhoneNumber); // Output: "7123456789"
-
-      const merchantReference = Math.floor(Math.random() * 1000000000000000);
-      const phone = formattedPhoneNumber;
-      const countryCode = '254';
-      const callbackUrl = 'http://localhost:3000/';
-      const notificationId = 'ce3407d6-1f5f-441e-8b06-ddc86428ac98';
-      const branch = 'KENCODERS KE';
-      const firstName = 'Nelson';
-      const middleName = 'Lemein';
-      const lastName = 'Kilelo';
-      const emailAddress = 'nelson.lemein@yahoo.com';
-
-      const data = JSON.stringify({
-        "id": merchantReference,
-        "currency": "KES",
-        "amount": amountInput,
-        "description": "Payment By NELSON",
-        "callback_url": callbackUrl,
-        "notification_id": notificationId,
-        "branch": branch,
-        "billing_address": {
-          "email_address": emailAddress,
-          "phone_number": phone,
-          "country_code": countryCode,
-          "first_name": firstName,
-          "middle_name": middleName,
-          "last_name": lastName,
-          "line_1": "",
-          "line_2": "",
-          "city": "",
-          "state": "",
-          "postal_code": null,
-          "zip_code": null
-        }
-      });
-      const config = {
-        method: 'post',
-        url: SubmitOrderRequest,
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          Authorization: token,
-        },
-        data: data,
-      };
-      const response = await axios(config);
-      const [rows] = await dbConnection.execute(
-        "INSERT INTO `worker_transaction_list`(`workers_transactions`,`order_tracking_id`) VALUES (?,?)", [`${req.session.worker.workerMobile}`, response.data.order_tracking_id]
-      );
-      if (rows.affectedRows !== 1) {
-        return res.render("Your order tracking failed.")
-      }
-      res.json({ success: true, message: `Order Sent Successfully: Status-${response.data.status}`, paymentURL: response.data.redirect_url });
-    } catch (error) {
-      console.error('Error on Placing order:', error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-  } else {
-    // return res.json({ success: false, message: 'Worker Must Log in first...' });
-    res.json({ success: false, message: 'Please LogIn To make payments' });
-    // return res.sendFile(path.join(__dirname, 'public', 'home.html'));
-  }
-});
-
-//==========================================================================
-//  PESAPAL API STOP
-//==========================================================================
-
-
-// Socket.io connection handling
-io.on('connection', (socket) => {
-  console.log('This client is connected to socket.io');
-});
+app.post('/signup', workerSignup);
+app.post('/login',userLoginAttemptLimiter, workerLogin);
+// app.post('/api/data', (req, res) => {
+//   insertData(req, res, io);
+// });
+app.post('/reset-password/request', resetPasswordRequest);
+app.post('/reset-password/verify', resetPasswordVerify);
+app.post('/account-verification', accountVerification);
+app.post('/register-ipn', registerIpn);
+app.post('/submit-order', submitOrder);
 
 app.use(async (req, res, next) => {
   try {
@@ -579,6 +367,6 @@ app.use(async (req, res, next) => {
   }
 })
 
-const PORT = 3000;
+
 server.listen(PORT, () => console.log(`Server is running on port : ${PORT}`));
 
