@@ -287,17 +287,32 @@ app.get('/api/workers', async (req, res) => {
   try {
     const workerData = await dbConnection.execute('SELECT * FROM `workers`');
 
-    // Map each worker to their full name and join the results
-    const workerNames = workerData[0].map((worker) => `${worker.worker_first_name} ${worker.worker_last_name}`).join(', ');
+    // Map each worker to the desired format
+    const workers = workerData[0].map((worker) => ({
+      id: worker.id,
+      firstName: worker.worker_first_name,
+      lastName: worker.worker_last_name,
+      occupation: worker.occupation,
+      workerImage: worker.worker_image,
+      rating: worker.rating,
+      reviews: worker.reviews,
+      tendender: worker.tendender
+    }));
 
-    console.log(workerNames);
+    // Check if there is only one worker
+    const responseToSend = workers.length === 1 ? [workers[0]] : workers;
 
-    res.json({ workerNames });
+    // Send individual worker objects in the response
+    res.json(responseToSend);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
+
+
 
 
 

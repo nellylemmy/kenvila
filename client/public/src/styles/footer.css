@@ -2,10 +2,6 @@
   box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
-}
-
 footer {
   font: 11px "Open Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -39,7 +35,7 @@ a {
   flex-flow: row wrap;
 }
 
-main {
+/* main {
   flex: 1 1 auto;
   display: flex;
   align-items: center;
@@ -47,7 +43,7 @@ main {
   font: 10em "Oswald", sans-serif;
   color: #9b9b9b;
   line-height: 1;
-}
+} */
 
 footer {
   background: #3c73a8;
@@ -163,9 +159,9 @@ footer {
   }
 }
 @media only screen and (max-width: 568px) {
-  main {
+  /* main {
     font-size: 5em;
-  }
+  } */
 
   .footer-list-top {
     width: 100%;
