@@ -1473,9 +1473,3 @@ video {
     padding-bottom: 2.5rem;
   }
 }
-
-@media (min-width: 1280px) {
-  .xl\:max-w-screen-xl {
-    max-width: 1280px;
-  }
-}
