@@ -55,6 +55,27 @@ app.use(session({
 }));
 app.set('trust proxy', false);
 
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ server });
+
+// Serve static files from the public directory
+app.use(express.static('public'));
+
+// WebSocket connection handling
+wss.on('connection', function connection(ws) {
+  ws.on('message', function incoming(message) {
+    // Handle incoming messages from clients
+    console.log('Received message from client:', message);
+    // Broadcast the message to all clients (in this case, the location update)
+    wss.clients.forEach(function each(client) {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  });
+});
+
 const PORT = 3000;
 const randomString = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 console.log(randomString())
@@ -281,13 +302,65 @@ app.get('/worker/message-room-data', async (req, res) => {
   }
 });
 
+app.use((req, res, next) => {
+  let ipAddress = req.ip || req.socket.remoteAddress;
+
+  // If the IP address includes '::1', try to get the client IP from the 'x-forwarded-for' header
+  if (ipAddress === '::1' && req.headers['x-forwarded-for']) {
+      const forwardedFor = req.headers['x-forwarded-for'].split(',')[0];
+      ipAddress = forwardedFor.trim();
+  }
+
+  // If the IP address still includes '::ffff:', remove it
+  const userIP = ipAddress.replace(/^::ffff:/, '');
+
+  console.log('User IP:', userIP);
+
+  // Pass the userIP to the next middleware or route
+  req.userIP = userIP;
+
+  next();
+});
 
 
-app.get('/api/workers', async (req, res) => {
+
+const axios = require('axios');
+
+// Function to get location information
+async function getLocation(ip) {
+  const access_key = '38a323b8c683dcd7c69febbb9a7318bc';
+  const apiUrl = `http://api.ipapi.com/${ip}?access_key=${access_key}`;
+  
   try {
-    const workerData = await dbConnection.execute('SELECT * FROM `workers`');
+    const response = await axios.get(apiUrl);
+    const locationData = response.data;
+    return {
+      country: locationData.country_name,
+      city: locationData.location.city,
+      callingCode: locationData.location.calling_code,
+    };
+  } catch (error) {
+    console.error('Error fetching location data:', error.message);
+    return null;
+  }
+}
 
-    // Map each worker to the desired format
+// Function to get workers based on location
+async function getWorkersByLocation(req, res) {
+  const userIP = req.userIP;
+  console.log('User IP:', userIP);
+
+  // Get client location information
+  const clientLocation = await getLocation(userIP);
+
+  if (!clientLocation) {
+    res.status(500).json({ error: 'Internal Server Error' });
+    return;
+  }
+
+  try {
+    // Fetch workers from the database
+    const workerData = await dbConnection.execute('SELECT * FROM `workers`');
     const workers = workerData[0].map((worker) => ({
       id: worker.id,
       firstName: worker.worker_first_name,
@@ -296,19 +369,43 @@ app.get('/api/workers', async (req, res) => {
       workerImage: worker.worker_image,
       rating: worker.rating,
       reviews: worker.reviews,
-      tendender: worker.tendender
+      tendender: worker.tendender,
+      // Add location information for each worker
+      location: {
+        country: worker.country,
+        city: worker.city,
+        callingCode: worker.calling_code,
+      },
     }));
 
-    // Check if there is only one worker
-    const responseToSend = workers.length === 1 ? [workers[0]] : workers;
+    // Filter workers based on location (e.g., within the same country)
+    const filteredWorkers = workers.filter((worker) => {
+      return worker.location.country === clientLocation.country;
+    });
 
-    // Send individual worker objects in the response
-    res.json(responseToSend);
+    // Sort workers based on location proximity (you can implement a more sophisticated sorting logic)
+    const sortedWorkers = filteredWorkers.sort((a, b) => {
+      // Implement your sorting logic here
+      // For example, you can compare calling codes or distances
+      return a.location.callingCode - b.location.callingCode;
+    });
+
+    res.json(sortedWorkers);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-});
+}
+
+// Route for getting workers based on location
+app.get('/api/workers', getWorkersByLocation);
+
+// You can create a similar function for clients if needed
+// ...
+
+// Route for getting clients based on location
+// app.get('/api/clients', getClientsByLocation);
+
 
 
 

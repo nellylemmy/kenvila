@@ -34,6 +34,7 @@ const getMyTransactions = async (req, res) => {
           console.log(error);
         }
       }
+      console.log(transactionDataList)
       res.json(transactionDataList);
 
     } catch (error) {
