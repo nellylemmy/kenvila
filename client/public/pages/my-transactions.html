@@ -5,80 +5,219 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaction Data</title>
     <style>
-      body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-}
-
-#transactionList {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.transactionItem {
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-    padding: 10px;
-}
-
-    </style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 20px;
+        }
+        #transactionList {
+          max-width: 600px;
+          margin: 0 auto;
+        }
+        .transactionItem {
+          margin-bottom: 10px;
+          padding: 10px;
+          position: relative; /* Add position relative for absolute positioning */
+        }
+        .paymentStatus {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          text-align: center;
+          font-weight: bold;
+          padding: 5px 0;
+          border-bottom: 1px solid; /* Add border bottom */
+        }
+        .transaction-card{
+          padding-top: 1rem;
+        }
+      </style>
 </head>
 <body>
+  <div id="transactionList"></div>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Display loading spinner while waiting for data
+      const transactionListContainer = document.getElementById('transactionList');
+      transactionListContainer.innerHTML = '<div>Loading...</div>';
 
-<div id="transactionList"></div>
-
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Fetch transaction data from the server
-    axios.get('/my_transaction')
+      // Fetch transaction data from the server
+      axios.get('/my_transaction')
         .then(function (response) {
-            // Handle the response and display transaction data
-            displayTransactionData(response.data);
+          // Handle the response and display sorted transaction data
+          displaySortedTransactionData(response.data);
         })
         .catch(function (error) {
-            console.error(error);
-            // Handle error, display an error message, etc.
+          // console.error(error);
+          transactionListContainer.innerHTML = `<div>An Error occured! Try again later</div>`;
+          // Handle error, display an error message, etc.
         });
-});
+    });
 
-function displayTransactionData(transactionDataList) {
-    const transactionListContainer = document.getElementById('transactionList');
+    function formatDateTime(date) {
+      const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+      return new Intl.DateTimeFormat('en-US', options).format(new Date(date));
+    }
 
-    // Clear existing content
-    transactionListContainer.innerHTML = '';
+    function displaySortedTransactionData(transactionDataList) {
+      // Sort transactions by created_date in descending order
+      const sortedTransactions = transactionDataList.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-    // Display each transaction item
-    transactionDataList.forEach(function (transactionData) {
+      const transactionListContainer = document.getElementById('transactionList');
+      // Clear existing content
+      transactionListContainer.innerHTML = '';
+
+      // Show a message if data is empty
+      if (sortedTransactions.length === 0) {
+        transactionListContainer.innerHTML = '<p>No transactions made!</p>';
+        return;
+      }
+
+      // Display each transaction item
+      sortedTransactions.forEach(async function (transactionData) {
         const transactionItem = document.createElement('div');
         transactionItem.classList.add('transactionItem');
+        const paymentStatusHeading = document.createElement('div');
+        paymentStatusHeading.style.textTransform = 'uppercase';
+
+        // const getStatus = await document.getElementsByClassName('get-status');
+
+        // Set card border color based on status_code
+        switch (transactionData.status_code) {
+            case 1:
+            transactionItem.style.border = '1px solid green';
+            paymentStatusHeading.style.borderBottom = '1px solid green';
+            paymentStatusHeading.style.color = 'green';
+            // getStatus.style.color = 'green';
+            paymentStatusHeading.style.background = '#00800036';
+            break;
+          case 2:
+            transactionItem.style.border = '1px solid orange';
+            paymentStatusHeading.style.borderBottom = '1px solid orange';
+            paymentStatusHeading.style.color = 'orange';
+            // getStatus.style.color = 'orange';
+            paymentStatusHeading.style.background = '#ffa50036';
+            break;
+          case 0:
+            transactionItem.style.border = '1px solid red';
+            paymentStatusHeading.style.borderBottom = '1px solid red';
+            paymentStatusHeading.style.color = 'red';
+            // getStatus.style.color = 'red';
+            paymentStatusHeading.style.background = '#ff000036';
+            break;
+          default:
+            transactionItem.style.border = '1px solid #ccc';
+            paymentStatusHeading.style.borderBottom = '1px solid #ccc';
+            paymentStatusHeading.style.color = '#ccc';
+            // getStatus.style.color = '#ccc';
+            paymentStatusHeading.style.background = '#9e9e9e36';
+        }
+
+        // Create and append payment status heading
+        paymentStatusHeading.classList.add('paymentStatus');
+        paymentStatusHeading.innerText = transactionData.payment_status_description;
+        transactionItem.appendChild(paymentStatusHeading);
+
+        // Format the date to display in PM or AM format
+        const displayDateTime = formatDateTime(transactionData.created_date);
 
         // Customize how you want to display each transaction item
-        transactionItem.innerHTML = `
-            <p>Date: ${transactionData.created_date}</p>
-            <p>Transactin ID: ${transactionData.order_tracking_id}</p>
-            <p>Confirmation Code: ${transactionData.confirmation_code}</p>
-            <p>Payment Method: ${transactionData.payment_method}</p>
-            <p>Currency: ${transactionData.currency}</p>
-            <p>Amount: ${transactionData.amount}</p>
-            <p>Payment Status: ${transactionData.payment_status_description}</p>
-            <p>Message: ${transactionData.message}</p>
-            <p>Merchant Reference: ${transactionData.merchant_reference}</p>
-            <p>Payment Account: ${transactionData.payment_account}</p>
-            <p>Status Code: ${transactionData.status_code}</p>
-            <p>Status: ${transactionData.status}</p>
-            <p>Errors: ${transactionData.error.message}</p>
+        transactionItem.innerHTML += `
+                <div class="transaction-card">
+                <p>Date: ${displayDateTime}</p>
+                <p>Transactin ID: ${transactionData.order_tracking_id}</p>
+                <p>Payment Account: ${transactionData.payment_account}</p>
+                <p>Amount: ${transactionData.amount}</p>
+                <p>Payment Method: ${transactionData.payment_method}</p>
+                <p>Currency: ${transactionData.currency}</p>
+                </div>
+
+
+
+
+<div bgcolor="#f6f6f6" style="color: #333; height: 100%; width: 100%;" height="100%" width="100%">
+<table bgcolor="#f6f6f6" cellspacing="0" style="border-collapse: collapse; padding: 40px; width: 100%;" width="100%">
+<tbody>
+
+    <tr>
+        <td width="5px" style="padding: 0;"></td>
+        <td bgcolor="#FFFFFF" style="border: 1px solid #000; clear: both; display: block; margin: 0 auto; max-width: 600px; padding: 0;">
+            <table width="100%" style="background: #f9f9f9; border-bottom: 1px solid #eee; border-collapse: collapse; color: #999;">
+                <tbody>
+                    <tr>
+                        <td width="50%" style="padding: 20px;"><strong style="color: #333; font-size: 24px;"> ${transactionData.currency} ${transactionData.amount}</strong> <span class="get-status">${transactionData.payment_status_description}</span> </td>
+                        <td align="right" width="50%" style="padding: 20px;">Thanks for using <span class="il">Bootdey.com</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td style="padding: 0;"></td>
+        <td width="5px" style="padding: 0;"></td>
+    </tr>
+    <tr>
+        <td width="5px" style="padding: 0;"></td>
+        <td style="border: 1px solid #000; border-top: 0; clear: both; display: block; margin: 0 auto; max-width: 600px; padding: 0;">
+            <table cellspacing="0" style="border-collapse: collapse; border-left: 1px solid #000; margin: 0 auto; max-width: 600px;">
+                <tbody>
+                    <tr>
+                        <td valign="top"  style="padding: 20px;">
+                            <h3
+                                style="
+                                    border-bottom: 1px solid #000;
+                                    color: #000;
+                                    font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+                                    font-size: 18px;
+                                    font-weight: bold;
+                                    line-height: 1.2;
+                                    margin: 0;
+                                    margin-bottom: 15px;
+                                    padding-bottom: 5px;
+                                "
+                            >
+                                Summary
+                            </h3>
+                            <table cellspacing="0" style="border-collapse: collapse; margin-bottom: 40px;">
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 5px 0;">Subscription amount</td>
+                                        <td align="right" style="padding: 5px 0;">$23.95</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 5px 0;">Tax</td>
+                                        <td align="right" style="padding: 5px 0;">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="border-bottom: 2px solid #000; border-top: 2px solid #000; font-weight: bold; padding: 5px 0;">TOTAL</td>
+                                        <td align="right" style="border-bottom: 2px solid #000; border-top: 2px solid #000; font-weight: bold; padding: 5px 0;">$23.95</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td width="5px" style="padding: 0;"></td>
+    </tr>
+</tbody>
+</table>
+</div>
+
+
+
+
+
+
         `;
 
         transactionListContainer.appendChild(transactionItem);
-    });
-}
-
-</script>
+      });
+    }
+  </script>
 </body>
 </html>
+
 
 
 <!-- {"payment_method":"","amount":12,"created_date":"2023-12-26T02:46:04.677","confirmation_code":"","order_tracking_id":"12098069-e581-4c6a-8757-ddc9853b2579","payment_status_description":"INVALID","description":null,"message":"Request processed successfully","payment_account":"","call_back_url":"https://7a48-154-159-254-169.ngrok-free.app/?OrderTrackingId=12098069-e581-4c6a-8757-ddc9853b2579&OrderMerchantReference=289384800155860","status_code":0,"merchant_reference":"289384800155860","payment_status_code":"","currency":"KES","error":{"error_type":"api_error","code":"payment_details_not_found","message":"Pending Payment","call_back_url":"https://7a48-154-159-254-169.ngrok-free.app/?OrderTrackingId=12098069-e581-4c6a-8757-ddc9853b2579&OrderMerchantReference=289384800155860"},"status":"500"} -->

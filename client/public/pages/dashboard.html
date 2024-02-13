@@ -1,49 +1,639 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-color-mode="dark" data-light-theme="light_high_contrast" data-dark-theme="dark_colorblind" data-a11y-animated-images="system" data-a11y-link-underlines="true" data-turbo-loaded="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dashboard</title>
-    <link rel="stylesheet" href="./../sweetalert2.min.css.css">
+    <title>KENVILA-KEPAS</title>
+    <link rel="shortcut icon" href="../src/media/round-kepas.png" type="image/x-icon">
+    <script src="../src/js/htmx.min.js"></script>
+    <link rel="stylesheet" href="../src/styles/tailwind.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../src/styles/sweetalert2.min.css.css">
+    <link rel="stylesheet" href="../src/styles/footer.css">
+    <link rel="stylesheet" href="../src/styles/styles.css">
+    <link rel="stylesheet" href="../src/styles/card-style.css">
+    <link rel="stylesheet" href="../src/styles/layout.css">
 </head>
-<body>
-    <h2>dashboard</h2>
-    <h3>LIST OF ACCOMPLISHMENTS TOMORROW</h3>
-    <ol>
-        <!-- <li>Ask worker before log out</li> -->
-        <!-- <li>Reset Your password</li> -->
-        <li>Verify Account (we send a verification code to phone number)</li>
-        <li>Socket.io to connect only loged in workers (only text. we will not save any media,it will be saved to the workers device. This data will be encrypted so it will be end to end encrypted)</li>
-        <li>check to see if we can have reset-password and verify-request-password on different pages nad we only do for the ones who have not loge in</li>
-    </ol>
-<hr>
-<a href="./message-room">message room2</a> <br><br>
-<br>
-    <h3>LIST OF ACCOMPLISHMENTS SOON</h3>
-    <ol>
-        <li>Split code for easy maintainance</li>
-        <li>Topbar for loged and not loged workers (buy skills, sell skills buttons)</li>
-        <li>Worker settings page</li>
-        <li>Worker Content writing page</li>
-        <li>Douglas's job</li>
-    </ol>
-    <br>
 
-    <hr>
-    <h3>LOGED IN CLIENTS</h3>
-    <a href="./../submit-order.html">Proceed to payment</a> <br><br>
-    <a href="./../my-transactions.html">My Transactions</a> <br><br>
-    <hr>
+<body class="logged-in env-production page-responsive page-profile mine intent-mouse" style="padding-right: 0px; overflow: initial;" data-new-gr-c-s-loaded="8.909.0">
+  <!-- component -->
+<div class="main-body-container body-bg-white flex items-center justify-center">
+  <div class="flex-1 flex flex-col space-y-5 lg:space-y-0 lg:flex-row lg:space-x-10 max-w-6xl sm:p-3 sm:my-2 sm:mx-4 sm:rounded-2xl">
+    
+    <!-- Navigation -->
+    <div class="Layout-sidebar">
+      <div class="z-10 sticky top-3 bg-white px-2 lg:px-4 py-2 lg:py-10 sm:rounded-xl flex lg:flex-col justify-between left-worker-sidebar">
+        <div class="h-card">
+          <div class="js-profile-editable-replace">
+            <div class="clearfix d-flex d-md-block flex-items-center mb-4 mb-md-0">
+              <div class="position-relative d-inline-block col-2 col-md-12 mr-3 mr-md-0 flex-shrink-0" style="z-index:4;">
+                <a class="tooltipped tooltipped-s d-block" aria-label="Change your avatar" data-hydro-click="{&quot;event_type&quot;:&quot;user_profile.click&quot;,&quot;payload&quot;:{&quot;profile_user_id&quot;:27158375,&quot;target&quot;:&quot;EDIT_AVATAR&quot;,&quot;user_id&quot;:27158375,&quot;originating_url&quot;:&quot;../src/media/nelson-400x400-dimensions.jpg&quot;}}" data-hydro-click-hmac="3e4f29bb6800a696f2ef2fcdbb2a9ead04aa19987cc2d7c9f5a7b819f73cb13c" href="/account"><img style="height:auto;" alt="" src="../src/media/nelson-400x400-dimensions.jpg" width="200" height="200" class="avatar avatar-user width-full border color-bg-default">
+                </a>
+              </div>
+              <div class="vcard-names-container float-left js-profile-editable-names col-12 py-3 js-sticky js-user-profile-sticky-fields" style="position: sticky;" data-original-top="0px">
+                <h1 class="vcard-names ">
+                  <span class="p-name vcard-fullname d-block overflow-hidden" itemprop="name">
+                    nelson
+                  </span>
+                  <span class="p-nickname vcard-username d-block" itemprop="additionalName">
+                    nellylemmy
+          
+                  </span>
+                </h1>
+              </div>
+            </div>
+            <div class="d-flex flex-column">
+              <div class="flex-order-1 flex-md-order-none"></div>
+              <div class="js-profile-editable-area d-flex flex-column d-md-block">
+                <div class="p-note user-profile-bio mb-3 js-user-profile-bio f4">
+                  <div><a href="./message-room">message room2</a></div>
+                  <div><a href="./../my-transactions.html">My Transactions</a></div>
+                  <div><a href="./../submit-order.html">Proceed to payment</a></div>
+                  <h5>FOR SUDO USER</h5>
+                  <div><a href="./../registerIPN.html">Register IPN</a></div>
+                  <div><a href="./../ipnlist.html">IPN List</a></div>
+                  <div>Web developer, Node Js, JavaScript, MYSQL </div>
+                </div>
+                <div class="mb-3">
+                  <button class="btn btn-block js-profile-editable-edit-button" type="button" name="button">
+                    Edit Profile
+                  </button>
+                </div>
+                <div><button id="logoutButton">Logout</button> </div>
+                <div class="flex-order-1 flex-md-order-none mt-2 mt-md-0">
+                  <div class="mb-3">
+                    <a class="Link--secondary no-underline no-wrap" href="https://github.com/nellylemmy?tab=followers">
+                      <svg text="muted" aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" data-view-component="true" class="octicon octicon-people">
+                <path d="M2 5.5a3.5 3.5 0 1 1 5.898 2.549 5.508 5.508 0 0 1 3.034 4.084.75.75 0 1 1-1.482.235 4 4 0 0 0-7.9 0 .75.75 0 0 1-1.482-.236A5.507 5.507 0 0 1 3.102 8.05 3.493 3.493 0 0 1 2 5.5ZM11 4a3.001 3.001 0 0 1 2.22 5.018 5.01 5.01 0 0 1 2.56 3.012.749.749 0 0 1-.885.954.752.752 0 0 1-.549-.514 3.507 3.507 0 0 0-2.522-2.372.75.75 0 0 1-.574-.73v-.352a.75.75 0 0 1 .416-.672A1.5 1.5 0 0 0 11 5.5.75.75 0 0 1 11 4Zm-5.5-.5a2 2 0 1 0-.001 3.999A2 2 0 0 0 5.5 3.5Z"></path>
+            </svg>
+                      <span class="text-bold color-fg-default">0</span>
+                      followers
+            </a>. 
+            <a class="Link--secondary no-underline no-wrap" href="https://github.com/nellylemmy?tab=following">
+              <span class="text-bold color-fg-default">6</span>
+              following
+    </a>
+                  </div>
+                </div>
+              </div>
 
-    <h3>SUPER ADMIN DASHBOARD</h3>
-    <a href="./../registerIPN.html">Register IPN</a> <br><br>
-    <a href="./../ipnlist.html">IPN List</a><br><hr><br>
+            </div>            
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <button id="logoutButton">Logout</button>
+    <!-- Content -->
+    <div class="flex-1 px-2 sm:px-0">
+      <div class="flex bg-white z-10 width-full p-2 justify-between items-center sticky top-0 rounded top-bar">
+        <h3 class="text-3xl font-extralight">KEPAS</h3>
+        <div class="inline-flex items-center space-x-2">
+          <form>   
+            <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    </svg>
+                </div>
+                <input type="search" id="default-search" class="block w-full px-3 py-0.5 ps-10 text-sm text-gray-900 border border-gray-300 rounded bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search..." required disabled>
+            </div>
+        </form>
+        <button type="submit" class="text-white inline-flex items-center bg-blue-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-1.5 text-center dark:bg-blue-500 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
+          Post Your Skills
+      </button>
+          
+
+<!-- Main modal -->
+<div id="authentication-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-hidden overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full login-modal">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Sign in to KEPAS
+                </h3>
+                <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="authentication-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5">
+                <form class="space-y-4" id="loginForm">
+                    <div>
+                        <label for="workerMobileNumber" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter Mobile Number:</label>
+                        <input type="tel" id="workerMobileNumber" name="workerMobile" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Enter Mobile Number" required>
+                        <select id="phoneDropdown" style="display: none;">
+                          <option value="Select Number">Select Number</option>
+                          <option value="0741642093">0741642093</option>
+                          <option value="0113913631">0113913631</option>
+                          <option value="0792471415">0792471415</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="workerPassword" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
+                        <input type="password" id="workerPassword" name="workerPassword" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                    </div>
+                    <div class="flex justify-between">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="remember" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800">
+                            </div>
+                            <label for="remember" class="ms-2 text-sm font-medium text-gray-900 select-none dark:text-gray-300">Remember me</label>
+                        </div>
+                        <a href="./reset-password.html" class="text-sm text-blue-700 hover:underline dark:text-blue-500">Lost Password?</a>
+                    </div>
+                    <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login</button>
+                    <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+                        Not registered? <a href="./signup.html" class="text-blue-700 hover:underline dark:text-blue-500">Create account</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div> 
 
 
-<script src="./../sweetalert2@11.min.js"></script>
-<script>
+<div id="signup-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-hidden overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%)] max-h-full">
+  <div class="relative p-4 w-full max-w-md max-h-full signup-modal">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <!-- Modal header -->
+          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                  Sign Up to KEPAS
+              </h3>
+              <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" signup-data-modal-hide="signup-modal">
+                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                  </svg>
+                  <span class="sr-only">Close</span>
+              </button>
+          </div>
+          <!-- Modal body -->
+          <div class="p-4 md:p-5">
+              <form class="space-y-4" id="signupForm">
+                  <div>
+                      <label for="workerFirstName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter First Name (3 characters minimum, letters and numbers only):</label>
+                      <input type="text" id="workerFirstName" name="workerFirstName" pattern="[A-Za-z0-9]{3,}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                  </div>
+                  <div>
+                      <label for="workerLastName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter Last Name (3 characters minimum, letters and numbers only):</label>
+                      <input type="text" id="workerLastName" name="workerLastName" pattern="[A-Za-z0-9]{3,}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                  </div>
+                  <div>
+                      <label for="workerMobile" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter Mobile Number:</label>
+                      <input type="tel" id="workerMobile" name="workerMobile" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                  </div>
+                  <div>
+                      <label for="workerEmail" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter Email:</label>
+                      <input type="email" id="workerEmail" name="workerEmail" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                  </div>
+                  <div>
+                      <label for="signupWorkerPassword" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Enter Password (6 characters minimum):</label>
+                      <input type="password" id="signupWorkerPassword" name="signupWorkerPassword" pattern=".{6,}" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                  </div>
+                  <div>
+                      <label for="workerRepeatPassword" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Repeat Password:</label>
+                      <input type="password" id="workerRepeatPassword" name="workerRepeatPassword" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                  </div>
+                  <div class="flex justify-between">
+                      <div class="flex items-start">
+                          <label for="showPassword" class="ms-2 text-sm font-medium text-gray-900 select-none dark:text-gray-300"><input type="checkbox" id="showPassword"> Show Password</label>
+                      </div>
+                  </div>
+                  <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Signup</button>
+              </form>
+          </div>
+      </div>
+  </div>
+</div> 
+
+        </div>
+      </div>
+
+
+      <div class="mt-2">
+        <div class="js-pinned-items-reorder-container">
+          <div class="float-right">
+            <button>
+              <svg fill="#000000" height="16" width="16" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 viewBox="0 0 471.701 471.701" xml:space="preserve">
+<g>
+	<path d="M433.601,67.001c-24.7-24.7-57.4-38.2-92.3-38.2s-67.7,13.6-92.4,38.3l-12.9,12.9l-13.1-13.1
+		c-24.7-24.7-57.6-38.4-92.5-38.4c-34.8,0-67.6,13.6-92.2,38.2c-24.7,24.7-38.3,57.5-38.2,92.4c0,34.9,13.7,67.6,38.4,92.3
+		l187.8,187.8c2.6,2.6,6.1,4,9.5,4c3.4,0,6.9-1.3,9.5-3.9l188.2-187.5c24.7-24.7,38.3-57.5,38.3-92.4
+		C471.801,124.501,458.301,91.701,433.601,67.001z M414.401,232.701l-178.7,178l-178.3-178.3c-19.6-19.6-30.4-45.6-30.4-73.3
+		s10.7-53.7,30.3-73.2c19.5-19.5,45.5-30.3,73.1-30.3c27.7,0,53.8,10.8,73.4,30.4l22.6,22.6c5.3,5.3,13.8,5.3,19.1,0l22.4-22.4
+		c19.6-19.6,45.7-30.4,73.3-30.4c27.6,0,53.6,10.8,73.2,30.3c19.6,19.6,30.3,45.6,30.3,73.3
+		C444.801,187.101,434.001,213.101,414.401,232.701z"/>
+</g>
+</svg>
+            </button>
+          </div>
+          <h2 class="f4 text-normal">
+            Tailored for you
+          <svg style="box-sizing: content-box; color: var(--color-icon-primary);" width="16" height="16" viewBox="0 0 16 16" fill="none" data-view-component="true" class="spinner pinned-items-spinner js-pinned-items-spinner v-align-text-bottom ml-1 anim-rotate">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-opacity="0.25" stroke-width="2" vector-effect="non-scaling-stroke" fill="none"></circle>
+        <path d="M15 8a7.002 7.002 0 00-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+      </svg>
+          <span class="ml-2 color-fg-muted f6 js-pinned-items-reorder-message" role="status" aria-live="polite" data-error-text="Something went wrong." data-success-text="Order updated."></span>
+        </h2>
+        <div class="mb-10 sm:mb-0 mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
+        <div class="mycard relative">
+              <p class="absolute top-2 right-3 text-black/60 inline-flex items-center text-xs">Online <span class="ml-2 w-2 h-2 block bg-green-500 rounded-full group-hover:animate-pulse"></span></p>
+              <img class="profile-picture" src="../src/media/nelson-400x400-dimensions.jpg" alt="Profile Picture">
+              <div class="name">NELSON LEMEIN</div>
+              <div class="headline">Web Developer</div>
+              <div class="skills">
+                  <span>HTML</span>
+                  <span>CSS</span>
+                  <span>JavaScript</span>
+              </div>
+              <div class="location">New York, NY</div>
+              <div class="availability">Available Now</div>
+              <div class="rate">$50/hour</div>
+              <div class="introduction">
+                  Experienced web developer with a passion for creating user-friendly and visually appealing websites. 
+                  <div class="read-more">Read More</div>
+              </div>
+          </div>
+            <div class="mycard relative">
+              <p class="absolute top-2 right-3 text-black/60 inline-flex items-center text-xs">Online <span class="ml-2 w-2 h-2 block bg-green-500 rounded-full group-hover:animate-pulse"></span></p>
+              <img class="profile-picture" src="../src/media/nelson-400x400-dimensions.jpg" alt="Profile Picture">
+              <div class="name">NELSON LEMEIN</div>
+              <div class="headline">Web Developer</div>
+              <div class="skills">
+                  <span>HTML</span>
+                  <span>CSS</span>
+                  <span>JavaScript</span>
+              </div>
+              <div class="location">New York, NY</div>
+              <div class="availability">Available Now</div>
+              <div class="rate">$50/hour</div>
+              <div class="introduction">
+                  Experienced web developer with a passion for creating user-friendly and visually appealing websites. 
+                  <div class="read-more">Read More</div>
+              </div>
+          </div>
+            <div class="mycard relative">
+              <p class="absolute top-2 right-3 text-black/60 inline-flex items-center text-xs">Online <span class="ml-2 w-2 h-2 block bg-green-500 rounded-full group-hover:animate-pulse"></span></p>
+              <img class="profile-picture" src="../src/media/nelson-400x400-dimensions.jpg" alt="Profile Picture">
+              <div class="name">NELSON LEMEIN</div>
+              <div class="headline">Web Developer</div>
+              <div class="skills">
+                  <span>HTML</span>
+                  <span>CSS</span>
+                  <span>JavaScript</span>
+              </div>
+              <div class="location">New York, NY</div>
+              <div class="availability">Available Now</div>
+              <div class="rate">$50/hour</div>
+              <div class="introduction">
+                  Experienced web developer with a passion for creating user-friendly and visually appealing websites. 
+                  <div class="read-more">Read More</div>
+              </div>
+          </div>
+            <div class="mycard relative">
+              <p class="absolute top-2 right-3 text-black/60 inline-flex items-center text-xs">Online <span class="ml-2 w-2 h-2 block bg-green-500 rounded-full group-hover:animate-pulse"></span></p>
+              <img class="profile-picture" src="../src/media/nelson-400x400-dimensions.jpg" alt="Profile Picture">
+              <div class="name">NELSON LEMEIN</div>
+              <div class="headline">Web Developer</div>
+              <div class="skills">
+                  <span>HTML</span>
+                  <span>CSS</span>
+                  <span>JavaScript</span>
+              </div>
+              <div class="location">New York, NY</div>
+              <div class="availability">Available Now</div>
+              <div class="rate">$50/hour</div>
+              <div class="introduction">
+                  Experienced web developer with a passion for creating user-friendly and visually appealing websites. 
+                  <div class="read-more">Read More</div>
+              </div>
+          </div>
+            <div class="mycard relative">
+              <p class="absolute top-2 right-3 text-black/60 inline-flex items-center text-xs">Online <span class="ml-2 w-2 h-2 block bg-green-500 rounded-full group-hover:animate-pulse"></span></p>
+              <img class="profile-picture" src="../src/media/nelson-400x400-dimensions.jpg" alt="Profile Picture">
+              <div class="name">NELSON LEMEIN</div>
+              <div class="headline">Web Developer</div>
+              <div class="skills">
+                  <span>HTML</span>
+                  <span>CSS</span>
+                  <span>JavaScript</span>
+              </div>
+              <div class="location">New York, NY</div>
+              <div class="availability">Available Now</div>
+              <div class="rate">$50/hour</div>
+              <div class="introduction">
+                  Experienced web developer with a passion for creating user-friendly and visually appealing websites. 
+                  <div class="read-more">Read More</div>
+              </div>
+          </div>
+            <div class="mycard relative">
+              <p class="absolute top-2 right-3 text-black/60 inline-flex items-center text-xs">Online <span class="ml-2 w-2 h-2 block bg-green-500 rounded-full group-hover:animate-pulse"></span></p>
+              <img class="profile-picture" src="../src/media/nelson-400x400-dimensions.jpg" alt="Profile Picture">
+              <div class="name">NELSON LEMEIN</div>
+              <div class="headline">Web Developer</div>
+              <div class="skills">
+                  <span>HTML</span>
+                  <span>CSS</span>
+                  <span>JavaScript</span>
+              </div>
+              <div class="location">New York, NY</div>
+              <div class="availability">Available Now</div>
+              <div class="rate">$50/hour</div>
+              <div class="introduction">
+                  Experienced web developer with a passion for creating user-friendly and visually appealing websites. 
+                  <div class="read-more">Read More</div>
+              </div>
+          </div>
+            <div class="mycard relative">
+              <p class="absolute top-2 right-3 text-black/60 inline-flex items-center text-xs">Online <span class="ml-2 w-2 h-2 block bg-green-500 rounded-full group-hover:animate-pulse"></span></p>
+              <img class="profile-picture" src="../src/media/nelson-400x400-dimensions.jpg" alt="Profile Picture">
+              <div class="name">NELSON LEMEIN</div>
+              <div class="headline">Web Developer</div>
+              <div class="skills">
+                  <span>HTML</span>
+                  <span>CSS</span>
+                  <span>JavaScript</span>
+              </div>
+              <div class="location">New York, NY</div>
+              <div class="availability">Available Now</div>
+              <div class="rate">$50/hour</div>
+              <div class="introduction">
+                  Experienced web developer with a passion for creating user-friendly and visually appealing websites. 
+                  <div class="read-more">Read More</div>
+              </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- main navbar -->
+<!-- mobile navbar -->
+
+      <footer class="flex-rw">
+  
+        <ul class="footer-list-top">
+          <li>
+            <h4 class="footer-list-header">About Pavilion</h4></li>
+          <li><a href='/shop/about-mission' class="generic-anchor footer-list-anchor" itemprop="significantLink">GET TO KNOW US</a></li>
+          <li><a href='/promos.html' class="generic-anchor footer-list-anchor" itemprop="significantLink">PROMOS</a></li>
+          <li><a href='/retailers/new-retailers.html' class="generic-anchor footer-list-anchor" itemprop="significantLink">BECOME A RETAILER</a></li>
+      
+          <li><a href='/job-openings.html' itemprop="significantLink" class="generic-anchor footer-list-anchor">JOB OPENINGS</a></li>
+      
+          <li><a href='/shop/about-show-schedule' class="generic-anchor footer-list-anchor" itemprop="significantLink">EVENTS</a></li>
+        </ul>
+        <ul class="footer-list-top">
+          <li>
+            <h4 class="footer-list-header">The Gift Selection</h4></li>
+      
+      
+          <li><a href='/Angels/cat/id/70' class="generic-anchor footer-list-anchor">ANGEL FIGURINES</a></li>
+          <li><a href='/Home-Decor/cat/id/64' class="generic-anchor footer-list-anchor">HOME DECOR</a></li>
+          <li><a href='/Mugs/cat/id/32' class="generic-anchor footer-list-anchor">MUGS</a></li>
+          <li><a href='/Pet-Lover/cat/id/108' class="generic-anchor footer-list-anchor">PET LOVER</a></li>
+          <li><a href='/Ladies-Accessories/cat/id/117' class="generic-anchor footer-list-anchor" target="_blank">HANDBAGS & JEWELRY</a></li>
+        </ul>
+        <ul class="footer-list-top">
+          <li id='help'>
+            <h4 class="footer-list-header">Please Help Me</h4></li>
+          <li><a href='/shop/about-contact' class="generic-anchor footer-list-anchor" itemprop="significantLink">CONTACT</a></li>
+          <li><a href='/faq.html' class="generic-anchor footer-list-anchor" itemprop="significantLink">FAQ</a></li>
+          <li id='find-a-store'><a href='/shop/store-locator' class="generic-anchor footer-list-anchor" itemprop="significantLink">STORE LOCATOR</a></li>
+          <li id='user-registration'><a href='/shop/user-registration?URL=' class="generic-anchor footer-list-anchor" itemprop="significantLink">NEW USERS</a></li>
+          <li id='order-tracking'><a href='/shop/order-status' itemprop="significantLink" class="generic-anchor footer-list-anchor">ORDER STATUS</a></li>
+        </ul>
+        <section class="footer-social-section flex-rw">
+            <span class="footer-social-overlap footer-social-connect">
+            CONNECT <span class="footer-social-small">with</span> US
+            </span>
+            <span class="footer-social-overlap footer-social-icons-wrapper">
+            <a href="https://www.pinterest.com/paviliongift/" class="generic-anchor" target="_blank" title="Pinterest" itemprop="significantLink"><i class="fa fa-pinterest"></i></a>
+            <a href="https://www.facebook.com/paviliongift" class="generic-anchor" target="_blank" title="Facebook" itemprop="significantLink"><i class="fa fa-facebook"></i></a>
+            <a href="https://twitter.com/PavilionGiftCo" class="generic-anchor" target="_blank" title="Twitter" itemprop="significantLink"><i class="fa fa-twitter"></i></a>
+            <a href="http://instagram.com/paviliongiftcompany" class="generic-anchor" target="_blank" title="Instagram" itemprop="significantLink"><i class="fa fa-instagram"></i></a>
+            <a href="https://www.youtube.com/channel/UCYgUODvd0qXbu_LkUWpTVEg" class="generic-anchor" target="_blank" title="Youtube" itemprop="significantLink"><i class="fa fa-youtube"></i></a>
+            <a href="https://plus.google.com/+Paviliongift/posts" class="generic-anchor" target="_blank" title="Google Plus" itemprop="significantLink"><i class="fa fa-google-plus"></i></a>
+            </span>
+        </section>
+        <section class="footer-bottom-section flex-rw">
+      <div class="footer-bottom-wrapper">   
+      <i class="fa fa-copyright" role="copyright">
+       
+      </i> 2019 Pavilion in <address class="footer-address" role="company address">Bergen, NY</address><span class="footer-bottom-rights"> - All Rights Reserved - </span>
+          </div>
+          <div class="footer-bottom-wrapper">
+          <a href="/terms-of-use.html" class="generic-anchor" rel="nofollow">Terms</a> | <a href="/privacy-policy.html" class="generic-anchor" rel="nofollow">Privacy</a>
+            </div>
+        </section>
+      </footer>
+    <script src="../src/js/sweetalert2@11.min.js"></script>
+    <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const modalButton = document.querySelector('[data-modal-toggle]');
+    const signupModalButton = document.querySelector('[signup-data-modal-toggle]');
+    const loginmodal = document.getElementById('authentication-modal');
+    const signupmodal = document.getElementById('signup-modal');
+    const closeButton = loginmodal.querySelector('[data-modal-hide]');
+    const signupcloseButton = signupmodal.querySelector('[signup-data-modal-hide]');
+
+    // Function to show the modal
+    const showModal = () => {
+      loginmodal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    };
+    const showSignupModal = () => {
+      signupmodal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    };
+
+    // Function to hide the modal
+    const hideModal = () => {
+      loginmodal.classList.add('hidden');
+      document.body.style.overflow = '';
+    };
+    const hideSignupModal = () => {
+      signupmodal.classList.add('hidden');
+      document.body.style.overflow = '';
+    };
+
+    // Event listener to show the modal on button click
+    modalButton.addEventListener('click', showModal);
+    signupModalButton.addEventListener('click', showSignupModal);
+
+    // Event listener to hide the modal on close button click
+    closeButton.addEventListener('click', hideModal);
+    signupcloseButton.addEventListener('click', hideSignupModal);
+
+    // Event listener to hide the modal when clicking outside the modal
+    loginmodal.addEventListener('click', function (event) {
+      if (event.target === loginmodal) {
+        hideModal();
+      }
+    });
+    signupmodal.addEventListener('click', function (event) {
+      if (event.target === signupmodal) {
+        hideSignupModal();
+      }
+    });
+
+    // Event listener to hide the modal on pressing the Esc key
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        hideModal();
+      }
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        hideSignupModal();
+      }
+    });
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const workerMobile = document.getElementById('workerMobileNumber').value;
+      const workerPassword = document.getElementById('workerPassword').value;
+
+      try {
+        // Send data to the server for login
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ workerMobile, workerPassword }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        // Redirect or show a message based on the response
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'SUCCESS',
+            text: data.message,
+          }).then(() => {
+            window.location.href = '/worker/dashboard';
+          });
+          return
+        }else if(data.notVerified == true){
+          Swal.fire({
+            icon: 'error',
+            title: 'Not Verified',
+            text: data.message,
+          }).then(() => {
+            window.location.href = '/verify-account.html';
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'An Error Occured!',
+            text: data.message,
+          })
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+
+    document.getElementById('workerMobileNumber').addEventListener('click', function() {
+        var dropdown = document.getElementById('phoneDropdown');
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    // Update input value when a dropdown option is selected
+    document.getElementById('phoneDropdown').addEventListener('change', function() {
+        var selectedNumber = this.value;
+        document.getElementById('workerMobileNumber').value = selectedNumber;
+
+        // Hide the dropdown after selection
+        this.style.display = 'none';
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const workerFirstName = document.getElementById('workerFirstName').value;
+      const workerLastName = document.getElementById('workerLastName').value;
+      const workerMobile = document.getElementById('workerMobile').value;
+      const workerEmail = document.getElementById('workerEmail').value;
+      const signupWorkerPassword = document.getElementById('signupWorkerPassword').value;
+      const workerRepeatPassword = document.getElementById('workerRepeatPassword').value;
+
+      // Validate password match
+      if (signupWorkerPassword !== workerRepeatPassword) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Warning!',
+            text: 'Passwords do not match! Please check to be sure that they math and try again',
+          })
+        return;
+      }
+
+      try {
+        // Send data to the server for signup
+        const response = await fetch('/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ workerFirstName, workerLastName, workerMobile, workerEmail, signupWorkerPassword }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        // Redirect or show a message based on the response
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Signup successful!',
+            text: data.message,
+          }).then(() => {
+            // Redirect to the login page
+            window.location.href = '/verify-account.html';
+          });
+          // Redirect to the login page or another page if needed
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Signup Not successful!',
+            text: data.message,
+          })
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+
+
+    });
+
+    // Toggle show/hide password
+    document.getElementById('showPassword').addEventListener('change', function () {
+      const passwordInput = document.getElementById('signupWorkerPassword');
+      const repeatPasswordInput = document.getElementById('workerRepeatPassword');
+      passwordInput.type = this.checked ? 'text' : 'password';
+      repeatPasswordInput.type = this.checked ? 'text' : 'password';
+    });
+
     document.getElementById('logoutButton').addEventListener('click', function () {
       // Display a confirmation dialog using SweetAlert2
       Swal.fire({
@@ -62,7 +652,7 @@
         }
       });
     });
-</script>    
 
+  </script>
 </body>
 </html>

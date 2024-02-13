@@ -5,7 +5,15 @@ const sendVerificationEmail = require('./sendVerificationEmail'); // Import your
 const generateRandomNumbers = require('./randomNumberGenerator');
 
 const workerSignup = async (req, res, next) => {
-    const { workerFirstName, workerLastName, workerMobile, workerEmail, workerPassword } = await req.body;
+  function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
+    const { workerFirstName, workerLastName, workerMobile, workerEmail, signupWorkerPassword } = await req.body;
     try {
         // Validate inputs
         if (workerFirstName.length < 3) {
@@ -25,10 +33,10 @@ const workerSignup = async (req, res, next) => {
           return res.json({ success: false, message: 'Last name must contain only letters and numbers' });
         }
     
-        if (workerPassword.length < 6) {
+        if (signupWorkerPassword.length < 6) {
           return res.json({ success: false, message: 'Password must be at least 6 characters long' });
         }
-        const workerHashPassword = await bcrypt.hash(workerPassword, 12);
+        const workerHashPassword = await bcrypt.hash(signupWorkerPassword, 12);
         const workerPublicId = generateRandomNumbers(9, 9).join('');
     
         const [row] = await dbConnection.execute(
@@ -56,10 +64,15 @@ const workerSignup = async (req, res, next) => {
     
         const workerVerificationCode = verificationCode;
         const accountVerified = 0;
-    
+
+        const initialLetter = workerFirstName.charAt(0).toUpperCase();
+
+        const letterColor = getRandomColor();
+        const letterBackgroundColor = getRandomColor();
+        
         const [rows] = await dbConnection.execute(
-          "INSERT INTO `workers`(`worker_public_id`,`worker_first_name`,`worker_last_name`,`worker_mobile_number`,`worker_email`,`worker_password`, `verification_code`,`account_verified`) VALUES (?,?,?,?,?,?,?,?)",
-          [workerPublicId, workerFirstName, workerLastName, workerMobile, workerEmail, workerHashPassword, workerVerificationCode, accountVerified]
+          "INSERT INTO `workers`(`worker_public_id`,`worker_first_name`,`worker_last_name`,`worker_mobile_number`,`worker_email`,`worker_password`, `verification_code`,`account_verified`,`first_name_first_letter`,`first_name_background_color`, `first_name_color`) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+          [workerPublicId, workerFirstName, workerLastName, workerMobile, workerEmail, workerHashPassword, workerVerificationCode, accountVerified, initialLetter ,letterBackgroundColor, letterColor]
         );
         sendVerificationEmail(workerEmail, workerVerificationCode)
     
