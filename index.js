@@ -55,26 +55,26 @@ app.use(session({
 }));
 app.set('trust proxy', false);
 
-const WebSocket = require('ws');
+// const WebSocket = require('ws');
 
-const wss = new WebSocket.Server({ server });
+// const wss = new WebSocket.Server({ server });
 
 // Serve static files from the public directory
 app.use(express.static('public'));
 
 // WebSocket connection handling
-wss.on('connection', function connection(ws) {
-  ws.on('message', function incoming(message) {
-    // Handle incoming messages from clients
-    console.log('Received message from client:', message);
-    // Broadcast the message to all clients (in this case, the location update)
-    wss.clients.forEach(function each(client) {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    });
-  });
-});
+// wss.on('connection', function connection(ws) {
+//   ws.on('message', function incoming(message) {
+//     // Handle incoming messages from clients
+//     console.log('Received message from client:', message);
+//     // Broadcast the message to all clients (in this case, the location update)
+//     wss.clients.forEach(function each(client) {
+//       if (client !== ws && client.readyState === WebSocket.OPEN) {
+//         client.send(message);
+//       }
+//     });
+//   });
+// });
 
 const PORT = 3000;
 const randomString = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -197,30 +197,30 @@ const users = {};
 
 app.use(express.static('public'));
 
-io.on('connection', (socket) => {
-  socket.on('registerUser', ({ name, phoneNumber }) => {
-    users[phoneNumber] = { socketId: socket.id, name };
-    io.to(socket.id).emit('userRegistered', { name, phoneNumber });
-  });
+// io.on('connection', (socket) => {
+//   socket.on('registerUser', ({ name, phoneNumber }) => {
+//     users[phoneNumber] = { socketId: socket.id, name };
+//     io.to(socket.id).emit('userRegistered', { name, phoneNumber });
+//   });
 
-  socket.on('sendMessage', ({ from, to, message }) => {
-    const recipientSocketId = users[to]?.socketId;
-    if (recipientSocketId) {
-      io.to(recipientSocketId).emit('receiveMessage', { from, message });
-      io.to(socket.id).emit('messageSent', { to, message });
-    } else {
-      io.to(socket.id).emit('userNotValid', { to });
-    }
-  });
+//   socket.on('sendMessage', ({ from, to, message }) => {
+//     const recipientSocketId = users[to]?.socketId;
+//     if (recipientSocketId) {
+//       io.to(recipientSocketId).emit('receiveMessage', { from, message });
+//       io.to(socket.id).emit('messageSent', { to, message });
+//     } else {
+//       io.to(socket.id).emit('userNotValid', { to });
+//     }
+//   });
 
-  socket.on('typing', ({ name }) => {
-    io.emit('userTyping', { name });
-  });
+//   socket.on('typing', ({ name }) => {
+//     io.emit('userTyping', { name });
+//   });
 
-  socket.on('stopTyping', () => {
-    io.emit('userStoppedTyping');
-  });
-});
+//   socket.on('stopTyping', () => {
+//     io.emit('userStoppedTyping');
+//   });
+// });
 
 
 
@@ -272,6 +272,15 @@ function getAllActiveRooms() {
   return Array.from(new Set(UsersState.users.map(user => user.room)))
 }
 
+// Define the socket.io 'connection' event handler outside of the route handler
+io.on('connection', socket => {
+  console.log('User connected:', socket.id);
+});
+io.on('disconnect', socket => {
+  console.log('User Disconnected:', socket.id);
+});
+
+
 app.get('/worker/message-room-data', async (req, res) => {
   if (req.session.worker) {
     const workerMobile = req.session.worker.workerMobile;
@@ -285,16 +294,7 @@ app.get('/worker/message-room-data', async (req, res) => {
 
     io.to(activeWorkerMobileNumber).emit('worker-data', data);
     
-    
-    io.on('connection', socket => {
-      // Emit a socket event to the user
-      console.log('Emitted worker data to room:', activeWorkerMobileNumber);
-      console.log('User connected:', socket.id);
-    });
-    io.on('disconnect', socket => {
-      console.log('User Disconnected:', socket.id);
-    });
-    
+    console.log('Emitted worker data to room:', activeWorkerMobileNumber);
 
     return res.json(data);
   } else {
@@ -305,22 +305,29 @@ app.get('/worker/message-room-data', async (req, res) => {
 app.use((req, res, next) => {
   let ipAddress = req.ip || req.socket.remoteAddress;
 
+  console.log('Received IP address:', ipAddress);
+
   // If the IP address includes '::1', try to get the client IP from the 'x-forwarded-for' header
   if (ipAddress === '::1' && req.headers['x-forwarded-for']) {
       const forwardedFor = req.headers['x-forwarded-for'].split(',')[0];
       ipAddress = forwardedFor.trim();
   }
 
-  // If the IP address still includes '::ffff:', remove it
-  const userIP = ipAddress.replace(/^::ffff:/, '');
+  console.log('Adjusted IP address:', ipAddress);
 
-  console.log('User IP:', userIP);
+  // If the IP address still includes '::ffff:', remove it
+  if (ipAddress && ipAddress.includes('::ffff:')) {
+    ipAddress = ipAddress.replace(/^::ffff:/, '');
+  }
+
+  console.log('User IP:', ipAddress);
 
   // Pass the userIP to the next middleware or route
-  req.userIP = userIP;
+  req.userIP = ipAddress;
 
   next();
 });
+
 
 
 
@@ -453,7 +460,11 @@ app.get('/worker', async (req, res) => {
 });
 
 app.get('/ipn-register', async (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/public/pages', 'registerIPN.html'));
+  if (req.session.worker) {
+    return res.sendFile(path.join(__dirname, 'client/public/pages', 'registerIPN.html'));
+  }
+  return res.redirect('/worker');
+  // return res.sendFile(path.join(__dirname, 'client/public/pages', 'worker.html'));
 });
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => err);

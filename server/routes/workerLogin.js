@@ -37,7 +37,7 @@ const workerLogin = async (req, res, next) => {
     const checkPass = await bcrypt.compare(workerPassword, passwordFromDatabase);
 
     if (checkPass) {
-      if (rows[0].account_verified !== 1) {
+      if (rows[0].account_verified != 1) {
         let verificationCode = randomstring.generate({
           length: 8,
           charset: 'numeric',
@@ -45,7 +45,7 @@ const workerLogin = async (req, res, next) => {
 
         // Send SMS...
         const accountSid = 'AC03ae7a028065ef7541ffc3a9e961e842';
-        const authToken = '39f32eaaa08a8f1088e394bb5b7afe0a';
+        const authToken = 'e9a667b3645ad3ec8515bf75e901aad4';
         const twilioPhoneNumber = '+14108452540';
         const client = require('twilio')(accountSid, authToken);
 
