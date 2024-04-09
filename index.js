@@ -76,7 +76,7 @@ app.use(express.static('public'));
 //   });
 // });
 
-const PORT = 3000;
+const PORT = process.env.APP_PORT;
 const randomString = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 console.log(randomString())
 
@@ -137,7 +137,7 @@ function encrypt(text) {
 
 
 const algorithm = 'aes-192-cbc';
-const password = '793553d5229621cbf9e241c529125c1b7c3723bff47eea888062007add5aa7';
+const password = process.env.ENCRYPTION_ALGORITHM_PASSWORD;
 const encryptionKey = crypto.scryptSync(password, 'GfG', 24)
 const iv = Buffer.alloc(16, 3);
 

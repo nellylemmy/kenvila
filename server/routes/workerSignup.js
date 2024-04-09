@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const randomstring = require('randomstring');
 const dbConnection = require('../utils/dbconnection'); // Import your database connection module
@@ -76,9 +77,9 @@ const workerSignup = async (req, res, next) => {
         );
         sendVerificationEmail(workerEmail, workerVerificationCode)
     
-        const accountSid = 'AC03ae7a028065ef7541ffc3a9e961e842';
-        const authToken = '39f32eaaa08a8f1088e394bb5b7afe0a';
-        const twilioPhoneNumber = '+14108452540';
+        const accountSid = process.env.TWILIO_ACCOUNT_SID;
+        const authToken = process.env.TWILIO_ACCOUNT_AUTH_TOKEN;
+        const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
         const client = require('twilio')(accountSid, authToken);
         const sendSms = async (to, message) => {
           try {
@@ -96,7 +97,7 @@ const workerSignup = async (req, res, next) => {
         };
     
         // Example usage
-        const toPhoneNumber = '+254741642093'; // Replace with the recipient's phone number
+        const toPhoneNumber = process.env.TO_TWILIO_PHONE_NUMBER; // Replace with the recipient's phone number
         const smsMessage = `Your Verification Code Is ${verificationCode}`;
     
         sendSms(toPhoneNumber, smsMessage)
