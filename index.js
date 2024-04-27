@@ -280,6 +280,103 @@ io.on('disconnect', socket => {
   console.log('User Disconnected:', socket.id);
 });
 
+app.get('/unknown', async(req, res, next) => {
+  const { query } = req.query;
+  try {
+    const [rows, fields] = await dbConnection.execute('SELECT * FROM workers');
+    const plumbers = rows.map(user => `
+    <div class="card">
+    <div class="card__image-container relative">
+    <div class="availability_baj">Available</div>
+    <div class="quolifications">
+      <span>installations</span>
+      <span>Repairs</span>
+      <span>Maintenance</span>
+    </div>
+      <img
+      src="./user.jpg" alt="Profile Picture" width="100%"/>
+    </div>
+    <div class="card__content">
+      <div class="card__title text--medium name search-result grid">
+      <div class="worker-name">${user.worker_first_name} ${user.worker_last_name}</div>
+      <div class="rating-star"><img src="./star-svg.svg" width=15/><span>0.5</span></div>
+      </div>
+      <div class="card__info">
+        <div class="location">
+          ${((user.locality || user.town || user.country) ? `<img src="./location-pin-svg.svg" width=15/>` : '')}
+          ${(user.locality ? user.locality + ',' : '')}
+          ${(user.town ? user.town + ',' : '')}
+          ${(user.country ? user.country : '')}
+        </div>
+      </div>
+      <div class="wage-and-distance">
+      <div class="distance">17KM Away</div>
+      <div class="wage">Ksh. 1500/Day</div>
+      </div>
+    </div>
+  </div>
+      `).join('');
+    res.status(200).send(plumbers);
+    // next();
+    // res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } catch (error) {
+    console.error('Error searching users:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+app.get('/search', async (req, res) => {
+  const { query } = req.query;
+  try {
+    const [rows, fields] = await dbConnection.execute('SELECT * FROM workers WHERE worker_first_name LIKE ? OR worker_last_name LIKE ? OR locality LIKE ? OR country LIKE ? OR town LIKE ?', [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]);
+    if(rows.length === 0) {
+      res.send(`
+      <div class="mycard relative">
+      <br>
+          No results found.
+        </div>
+      `);
+    }else {
+    const searchUIResult = rows.map(user => `
+      <div class="card">
+      <div class="card__image-container relative">
+      <div class="availability_baj">Available</div>
+      <div class="quolifications">
+        <span>installations</span>
+        <span>Repairs</span>
+        <span>Maintenance</span>
+      </div>
+        <img
+        src="./user.jpg" alt="Profile Picture" width="100%"/>
+      </div>
+      <div class="card__content">
+        <div class="card__title text--medium name search-result grid">
+        <div class="worker-name">${user.worker_first_name} ${user.worker_last_name}</div>
+        <div class="rating-star"><img src="./star-svg.svg" width=15/><span>0.5</span></div>
+        </div>
+        <div class="card__info">
+          <div class="location">
+            ${((user.locality || user.town || user.country) ? `<img src="./location-pin-svg.svg" width=15/>` : '')}
+            ${(user.locality ? user.locality + ',' : '')}
+            ${(user.town ? user.town + ',' : '')}
+            ${(user.country ? user.country : '')}
+          </div>
+        </div>
+        <div class="wage-and-distance">
+        <div class="distance">17KM Away</div>
+        <div class="wage">Ksh. 1500/Day</div>
+        </div>
+      </div>
+    </div>
+      `).join('');
+    res.status(200).send(searchUIResult);
+    }
+  } catch (error) {
+    console.error('Error searching users:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 
 app.get('/worker/message-room-data', async (req, res) => {
   if (req.session.worker) {
@@ -291,11 +388,8 @@ app.get('/worker/message-room-data', async (req, res) => {
       name: fullWorkerName,
       phoneNumber: activeWorkerMobileNumber
     };
-
     io.to(activeWorkerMobileNumber).emit('worker-data', data);
-    
     console.log('Emitted worker data to room:', activeWorkerMobileNumber);
-
     return res.json(data);
   } else {
     return res.redirect('/worker');
@@ -304,31 +398,22 @@ app.get('/worker/message-room-data', async (req, res) => {
 
 app.use((req, res, next) => {
   let ipAddress = req.ip || req.socket.remoteAddress;
-
   console.log('Received IP address:', ipAddress);
-
   // If the IP address includes '::1', try to get the client IP from the 'x-forwarded-for' header
   if (ipAddress === '::1' && req.headers['x-forwarded-for']) {
       const forwardedFor = req.headers['x-forwarded-for'].split(',')[0];
       ipAddress = forwardedFor.trim();
   }
-
   console.log('Adjusted IP address:', ipAddress);
-
   // If the IP address still includes '::ffff:', remove it
   if (ipAddress && ipAddress.includes('::ffff:')) {
     ipAddress = ipAddress.replace(/^::ffff:/, '');
   }
-
   console.log('User IP:', ipAddress);
-
   // Pass the userIP to the next middleware or route
   req.userIP = ipAddress;
-
   next();
 });
-
-
 
 
 const axios = require('axios');
@@ -337,7 +422,6 @@ const axios = require('axios');
 async function getLocation(ip) {
   const access_key = '38a323b8c683dcd7c69febbb9a7318bc';
   const apiUrl = `http://api.ipapi.com/${ip}?access_key=${access_key}`;
-  
   try {
     const response = await axios.get(apiUrl);
     const locationData = response.data;
@@ -406,15 +490,6 @@ async function getWorkersByLocation(req, res) {
 
 // Route for getting workers based on location
 app.get('/api/workers', getWorkersByLocation);
-
-// You can create a similar function for clients if needed
-// ...
-
-// Route for getting clients based on location
-// app.get('/api/clients', getClientsByLocation);
-
-
-
 
 
 
